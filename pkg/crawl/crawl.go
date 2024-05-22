@@ -3,6 +3,7 @@ package crawl
 import (
 	"context"
 	"github.com/aquasecurity/vex-collector/pkg/crawl/golang"
+	"github.com/aquasecurity/vex-collector/pkg/crawl/npm"
 	"github.com/aquasecurity/vex-collector/pkg/vexhub"
 	"log/slog"
 )
@@ -17,6 +18,8 @@ func Packages(ctx context.Context, hub *vexhub.Hub) error {
 		switch pkg.PURL.Type {
 		case packageurl.TypeGolang:
 			crawler = golang.NewCrawler(hub.Root)
+		case packageurl.TypeNPM:
+			crawler = npm.NewCrawler(hub.Root)
 		default:
 			slog.Error("Unsupported package type", slog.String("type", pkg.PURL.Type))
 			continue
