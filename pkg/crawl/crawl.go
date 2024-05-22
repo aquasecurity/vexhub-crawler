@@ -2,6 +2,7 @@ package crawl
 
 import (
 	"context"
+	"github.com/aquasecurity/vex-collector/pkg/crawl/cargo"
 	"github.com/aquasecurity/vex-collector/pkg/crawl/golang"
 	"github.com/aquasecurity/vex-collector/pkg/crawl/maven"
 	"github.com/aquasecurity/vex-collector/pkg/crawl/npm"
@@ -24,6 +25,8 @@ func Packages(ctx context.Context, hub *vexhub.Hub) error {
 			crawler = npm.NewCrawler(hub.Root)
 		case packageurl.TypePyPi:
 			crawler = pypi.NewCrawler(hub.Root)
+		case packageurl.TypeCargo:
+			crawler = cargo.NewCrawler(hub.Root)
 		case packageurl.TypeMaven:
 			crawler = maven.NewCrawler(hub.Root)
 		default:
