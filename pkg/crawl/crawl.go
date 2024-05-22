@@ -5,6 +5,7 @@ import (
 	"github.com/aquasecurity/vex-collector/pkg/crawl/golang"
 	"github.com/aquasecurity/vex-collector/pkg/crawl/maven"
 	"github.com/aquasecurity/vex-collector/pkg/crawl/npm"
+	"github.com/aquasecurity/vex-collector/pkg/crawl/pypi"
 	"github.com/aquasecurity/vex-collector/pkg/vexhub"
 	"log/slog"
 )
@@ -21,6 +22,8 @@ func Packages(ctx context.Context, hub *vexhub.Hub) error {
 			crawler = golang.NewCrawler(hub.Root)
 		case packageurl.TypeNPM:
 			crawler = npm.NewCrawler(hub.Root)
+		case packageurl.TypePyPi:
+			crawler = pypi.NewCrawler(hub.Root)
 		case packageurl.TypeMaven:
 			crawler = maven.NewCrawler(hub.Root)
 		default:
