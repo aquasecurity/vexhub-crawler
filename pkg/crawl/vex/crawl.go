@@ -2,14 +2,18 @@ package vex
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/aquasecurity/vex-collector/pkg/download"
+	"github.com/go-git/go-git/v5"
 	"github.com/openvex/go-vex/pkg/vex"
 	"github.com/package-url/packageurl-go"
 	"io/fs"
 	"log/slog"
+	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 )
@@ -18,6 +22,11 @@ var (
 	errPURLMismatch = fmt.Errorf("PURL does not match")
 	errNoStatement  = fmt.Errorf("no statements found")
 )
+
+type Source struct {
+	Path string `json:"path"`
+	URL  string `json:"url"`
+}
 
 func CrawlPackage(ctx context.Context, vexHubDir, url string, purl packageurl.PackageURL) error {
 	tmpDir, err := os.MkdirTemp("", "vexhub-crawler-*")
@@ -31,6 +40,8 @@ func CrawlPackage(ctx context.Context, vexHubDir, url string, purl packageurl.Pa
 		return fmt.Errorf("download error: %w", err)
 	}
 
+	permaLink := githubPermalink(dst)
+
 	vexDir := filepath.Join(vexHubDir, "pkg", purl.Type, purl.Namespace, purl.Name, purl.Subpath)
 	vexDir = filepath.Clean(filepath.ToSlash(vexDir))
 
@@ -43,34 +54,39 @@ func CrawlPackage(ctx context.Context, vexHubDir, url string, purl packageurl.Pa
 	}
 
 	var found bool
+	var sources []Source
 	logger := slog.With("purl", purl.String(), "url", url)
-	err = filepath.WalkDir(tmpDir, func(path string, d fs.DirEntry, err error) error {
+	err = filepath.WalkDir(tmpDir, func(filePath string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return fmt.Errorf("failed to walk the directory: %w", err)
 		} else if d.IsDir() {
-			if filepath.Base(path) == "testdata" || filepath.Base(path) == "test" {
-				slog.Debug("Skipping test directory", slog.String("path", path))
+			if filepath.Base(filePath) == "testdata" || filepath.Base(filePath) == "test" {
+				slog.Debug("Skipping test directory", slog.String("path", filePath))
 				return filepath.SkipDir
 			}
 			return nil
-		} else if !matchPath(path) {
+		} else if !matchPath(filePath) {
 			return nil
 		}
 
-		logger.Info("Parsing VEX file", slog.String("path", path))
-		if err = validateVEX(path, purl.String()); errors.Is(err, errNoStatement) {
-			logger.Error("No statements found", slog.String("path", path))
+		logger.Info("Parsing VEX file", slog.String("path", filePath))
+		if err = validateVEX(filePath, purl.String()); errors.Is(err, errNoStatement) {
+			logger.Error("No statements found", slog.String("path", filePath))
 			return nil
 		} else if errors.Is(err, errPURLMismatch) {
-			logger.Error("PURL does not match", slog.String("path", path))
+			logger.Error("PURL does not match", slog.String("path", filePath))
 			return nil
 		} else if err != nil {
 			return fmt.Errorf("failed to validate VEX file: %w", err)
 		}
 
 		found = true
-		if err = os.Rename(path, filepath.Join(vexDir, filepath.Base(path))); err != nil {
+		if err = os.Rename(filePath, filepath.Join(vexDir, filepath.Base(filePath))); err != nil {
 			return fmt.Errorf("failed to move the file: %w", err)
+		}
+
+		if src := fileSource(dst, filePath, url, permaLink); src != nil {
+			sources = append(sources, *src)
 		}
 
 		return nil
@@ -82,7 +98,48 @@ func CrawlPackage(ctx context.Context, vexHubDir, url string, purl packageurl.Pa
 	if !found {
 		logger.Warn("No VEX file found")
 	}
+	if err = writeSources(sources, vexDir); err != nil {
+		return fmt.Errorf("failed to write sources: %w", err)
+	}
+
 	return nil
+}
+
+func githubPermalink(repoDir string) *url.URL {
+	repo, err := git.PlainOpen(repoDir)
+	if err != nil {
+		return nil
+	}
+
+	r, err := repo.Remote("origin")
+	if err != nil {
+		return nil
+	}
+
+	urls := r.Config().URLs
+	if len(urls) == 0 {
+		return nil
+	}
+	u, err := url.Parse(urls[0])
+	if err != nil || u.Host != "github.com" {
+		return nil
+	}
+	p, _, ok := strings.Cut(u.Path, ".git")
+	if !ok {
+		return nil
+	}
+	head, err := repo.Head()
+	if err != nil {
+		return nil
+	}
+
+	// e.g. https://github.com/aquasecurity/vextest/blob/ed76fc6c0e8e56318ce3148bd7bd938aad41491c/
+	u.Path = path.Join(p, "blob", head.Hash().String())
+
+	u.Scheme = "https"
+	u.User = nil
+	u.RawQuery = ""
+	return u
 }
 
 func matchPath(path string) bool {
@@ -107,6 +164,40 @@ func validateVEX(path, purl string) error {
 				return errPURLMismatch
 			}
 		}
+	}
+	return nil
+}
+
+func fileSource(root, filePath, url string, permaLink *url.URL) *Source {
+	relPath, err := filepath.Rel(root, filePath)
+	if err != nil {
+		slog.Error("Failed to get the relative path", slog.String("path", filePath), slog.Any("err", err))
+		return nil
+	}
+
+	source := Source{
+		Path: filepath.Base(filePath),
+		URL:  url,
+	}
+	if permaLink != nil {
+		l := *permaLink
+		l.Path = path.Join(l.Path, relPath)
+		source.URL = l.String()
+	}
+	return &source
+}
+
+func writeSources(sources []Source, dir string) error {
+	f, err := os.Create(filepath.Join(dir, "sources.json"))
+	if err != nil {
+		return fmt.Errorf("failed to create sources file: %w", err)
+	}
+	defer f.Close()
+
+	e := json.NewEncoder(f)
+	e.SetIndent("", "    ")
+	if err = e.Encode(sources); err != nil {
+		return fmt.Errorf("JSON encode error: %w", err)
 	}
 	return nil
 }
