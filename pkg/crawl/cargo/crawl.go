@@ -6,11 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/package-url/packageurl-go"
-
 	"github.com/aquasecurity/vexhub-crawler/pkg/config"
 	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
-	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/vex"
 )
 
 const cratesAPI = "https://crates.io/api/v1/crates/"
@@ -21,33 +18,16 @@ type Response struct {
 	} `json:"crate"`
 }
 
-type Crawler struct {
-	rootDir string
+type Crawler struct{}
+
+func NewCrawler() *Crawler {
+	return &Crawler{}
 }
 
-func NewCrawler(rootDir string) *Crawler {
-	return &Crawler{rootDir: rootDir}
-}
+func (c *Crawler) DetectSrc(ctx context.Context, pkg config.Package) (string, error) {
+	rawurl := cratesAPI + pkg.PURL.Name
 
-func (c *Crawler) Crawl(ctx context.Context, pkg config.Package) error {
-	src := pkg.URL
-	if src == "" {
-		repoURL, err := c.detectSrc(pkg.PURL)
-		if err != nil {
-			return fmt.Errorf("failed to detect source: %w", err)
-		}
-		src = repoURL
-	}
-	if err := vex.CrawlPackage(ctx, c.rootDir, src, pkg.PURL); err != nil {
-		return fmt.Errorf("failed to crawl package: %w", err)
-	}
-	return nil
-}
-
-func (c *Crawler) detectSrc(purl packageurl.PackageURL) (string, error) {
-	rawurl := cratesAPI + purl.Name
-
-	req, err := http.NewRequest(http.MethodGet, rawurl, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawurl, nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}

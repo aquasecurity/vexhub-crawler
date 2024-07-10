@@ -7,11 +7,8 @@ import (
 	"net/http"
 	"path"
 
-	"github.com/package-url/packageurl-go"
-
 	"github.com/aquasecurity/vexhub-crawler/pkg/config"
 	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
-	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/vex"
 )
 
 const npmAPI = "https://registry.npmjs.org/"
@@ -22,33 +19,16 @@ type Response struct {
 	} `json:"repository"`
 }
 
-type Crawler struct {
-	rootDir string
+type Crawler struct{}
+
+func NewCrawler() *Crawler {
+	return &Crawler{}
 }
 
-func NewCrawler(rootDir string) *Crawler {
-	return &Crawler{rootDir: rootDir}
-}
+func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, error) {
+	pkgName := path.Join(pkg.PURL.Namespace, pkg.PURL.Name)
 
-func (c *Crawler) Crawl(ctx context.Context, pkg config.Package) error {
-	src := pkg.URL
-	if src == "" {
-		repoURL, err := c.detectSrc(pkg.PURL)
-		if err != nil {
-			return fmt.Errorf("failed to detect source: %w", err)
-		}
-		src = repoURL
-	}
-	if err := vex.CrawlPackage(ctx, c.rootDir, src, pkg.PURL); err != nil {
-		return fmt.Errorf("failed to crawl package: %w", err)
-	}
-	return nil
-}
-
-func (c *Crawler) detectSrc(purl packageurl.PackageURL) (string, error) {
-	pkg := path.Join(purl.Namespace, purl.Name)
-
-	npmURL := npmAPI + pkg
+	npmURL := npmAPI + pkgName
 	resp, err := http.Get(npmURL)
 	if err != nil {
 		return "", fmt.Errorf("failed to get package info: %w", err)

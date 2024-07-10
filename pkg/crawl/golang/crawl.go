@@ -6,38 +6,20 @@ import (
 	"path"
 	"strings"
 
+	"golang.org/x/tools/go/vcs"
+
 	"github.com/aquasecurity/vexhub-crawler/pkg/config"
 	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
-	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/vex"
-
-	"github.com/package-url/packageurl-go"
-	"golang.org/x/tools/go/vcs"
 )
 
-type Crawler struct {
-	rootDir string
+type Crawler struct{}
+
+func NewCrawler() *Crawler {
+	return &Crawler{}
 }
 
-func NewCrawler(rootDir string) *Crawler {
-	return &Crawler{rootDir: rootDir}
-}
-
-func (c *Crawler) Crawl(ctx context.Context, pkg config.Package) error {
-	src := pkg.URL
-	if src == "" {
-		repoURL, err := c.detectSrc(pkg.PURL)
-		if err != nil {
-			return fmt.Errorf("failed to detect source: %w", err)
-		}
-		src = repoURL
-	}
-	if err := vex.CrawlPackage(ctx, c.rootDir, src, pkg.PURL); err != nil {
-		return fmt.Errorf("failed to crawl package: %w", err)
-	}
-	return nil
-}
-
-func (c *Crawler) detectSrc(purl packageurl.PackageURL) (string, error) {
+func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, error) {
+	purl := pkg.PURL
 	importPath := path.Join(purl.Namespace, purl.Name, purl.Subpath)
 
 	repoRoot, err := vcs.RepoRootForImportPath(importPath, false)

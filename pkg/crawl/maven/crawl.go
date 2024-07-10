@@ -10,11 +10,8 @@ import (
 	"path"
 	"strings"
 
-	"github.com/package-url/packageurl-go"
-
 	"github.com/aquasecurity/vexhub-crawler/pkg/config"
 	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
-	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/vex"
 )
 
 const defaultRepo = "https://repo.maven.apache.org/maven2"
@@ -39,33 +36,17 @@ type Scm struct {
 	URL string `xml:"url"`
 }
 
-type Crawler struct {
-	rootDir string
-}
+type Crawler struct{}
 
-func NewCrawler(rootDir string) *Crawler {
-	return &Crawler{rootDir: rootDir}
-}
-
-func (c *Crawler) Crawl(ctx context.Context, pkg config.Package) error {
-	src := pkg.URL
-	if src == "" {
-		repoURL, err := c.detectSrc(pkg.PURL)
-		if err != nil {
-			return fmt.Errorf("failed to detect source: %w", err)
-		}
-		src = repoURL
-	}
-	if err := vex.CrawlPackage(ctx, c.rootDir, src, pkg.PURL); err != nil {
-		return fmt.Errorf("failed to crawl package: %w", err)
-	}
-	return nil
+func NewCrawler() *Crawler {
+	return &Crawler{}
 }
 
 // detectSrc detects the source repository URL of the package.
 // It fetches the latest version and POM file to extract the repository URL
 // as we didn't find a way to get the repository URL directly from the metadata.
-func (c *Crawler) detectSrc(purl packageurl.PackageURL) (string, error) {
+func (c *Crawler) DetectSrc(ctx context.Context, pkg config.Package) (string, error) {
+	purl := pkg.PURL
 	repoURL := defaultRepo
 	if v, ok := purl.Qualifiers.Map()["repository_url"]; ok {
 		repoURL = v
@@ -76,9 +57,9 @@ func (c *Crawler) detectSrc(purl packageurl.PackageURL) (string, error) {
 		return "", fmt.Errorf("failed to parse repository URL: %w", err)
 	}
 
-	pkg := path.Join(purl.Namespace, purl.Name)
-	pkg = strings.ReplaceAll(pkg, ".", "/")
-	baseURL.Path = path.Join(baseURL.Path, pkg)
+	pkgName := path.Join(purl.Namespace, purl.Name)
+	pkgName = strings.ReplaceAll(pkgName, ".", "/")
+	baseURL.Path = path.Join(baseURL.Path, pkgName)
 
 	latest, err := c.fetchLatestVersion(baseURL)
 	if err != nil {

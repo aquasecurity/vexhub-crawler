@@ -3,11 +3,13 @@ package download
 import (
 	"context"
 	"fmt"
-	getter "github.com/hashicorp/go-getter"
-	"golang.org/x/xerrors"
 	"log/slog"
 	"maps"
 	"os"
+
+	"golang.org/x/xerrors"
+
+	"github.com/hashicorp/go-getter"
 )
 
 // Download downloads the configured source to the destination.
