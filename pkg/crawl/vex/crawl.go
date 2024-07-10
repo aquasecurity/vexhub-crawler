@@ -45,6 +45,10 @@ func CrawlPackage(ctx context.Context, vexHubDir, url string, purl packageurl.Pa
 	}
 
 	vexDir := filepath.Join(vexHubDir, "pkg", purl.Type, purl.Namespace, purl.Name, purl.Subpath)
+	if purl.Type == packageurl.TypeOCI {
+		name := purl.Qualifiers.Map()["repository_url"]
+		vexDir = filepath.Join(vexHubDir, "pkg", purl.Type, name)
+	}
 	vexDir = filepath.Clean(filepath.ToSlash(vexDir))
 	errBuilder = errBuilder.With("dir", vexDir)
 
