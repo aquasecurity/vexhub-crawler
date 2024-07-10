@@ -15,4 +15,7 @@ pkg:
       qualifiers:
         - key: repository_url
           value: public.ecr.aws/aquasecurity/trivy
-    - name: cilium
+    - name: cilium-runtime
+      qualifiers:
+        - key: repository_url
+          value: quay.io/cilium/cilium-runtime
