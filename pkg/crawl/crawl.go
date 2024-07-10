@@ -15,32 +15,37 @@ import (
 	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/pypi"
 )
 
-type Crawler interface {
-	Crawl(context.Context, vexhub.Package) error
+type Options struct {
+	VEXHubDir string
+	Packages  []config.Package
 }
 
-func Packages(ctx context.Context, hub *vexhub.Hub) error {
-	for _, pkg := range hub.Packages {
+type Crawler interface {
+	Crawl(context.Context, config.Package) error
+}
+
+func Packages(ctx context.Context, opts Options) error {
+	for _, pkg := range opts.Packages {
 		var crawler Crawler
 		switch pkg.PURL.Type {
 		case packageurl.TypeGolang:
-			crawler = golang.NewCrawler(hub.Root)
+			crawler = golang.NewCrawler(opts.VEXHubDir)
 		case packageurl.TypeNPM:
-			crawler = npm.NewCrawler(hub.Root)
+			crawler = npm.NewCrawler(opts.VEXHubDir)
 		case packageurl.TypePyPi:
-			crawler = pypi.NewCrawler(hub.Root)
+			crawler = pypi.NewCrawler(opts.VEXHubDir)
 		case packageurl.TypeCargo:
-			crawler = cargo.NewCrawler(hub.Root)
+			crawler = cargo.NewCrawler(opts.VEXHubDir)
 		case packageurl.TypeMaven:
-			crawler = maven.NewCrawler(hub.Root)
+			crawler = maven.NewCrawler(opts.VEXHubDir)
 		case packageurl.TypeOCI:
-			crawler = oci.NewCrawler(hub.Root)
+			crawler = oci.NewCrawler(opts.VEXHubDir)
 		default:
 			slog.Error("Unsupported package type", slog.String("type", pkg.PURL.Type))
 			continue
 		}
-		slog.Info("Crawling package",
-			slog.String("type", pkg.PURL.Type), slog.String("purl", pkg.PURL.String()))
+		logger := slog.With(slog.String("type", pkg.PURL.Type), slog.String("purl", pkg.PURL.String()))
+		logger.Info("Crawling package")
 		if err := crawler.Crawl(ctx, pkg); err != nil {
 			return err
 		}

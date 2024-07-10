@@ -47,7 +47,7 @@ func NewCrawler(rootDir string) *Crawler {
 	return &Crawler{rootDir: rootDir}
 }
 
-func (c *Crawler) Crawl(ctx context.Context, pkg vexhub.Package) error {
+func (c *Crawler) Crawl(ctx context.Context, pkg config.Package) error {
 	src := pkg.URL
 	if src == "" {
 		repoURL, err := c.detectSrc(pkg.PURL)
