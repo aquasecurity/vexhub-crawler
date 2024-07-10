@@ -2,13 +2,8 @@ package vex
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/aquasecurity/vex-collector/pkg/download"
-	"github.com/go-git/go-git/v5"
-	"github.com/openvex/go-vex/pkg/vex"
-	"github.com/package-url/packageurl-go"
 	"io/fs"
 	"log/slog"
 	"net/url"
@@ -16,6 +11,14 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/go-git/go-git/v5"
+	"github.com/openvex/go-vex/pkg/vex"
+	"github.com/package-url/packageurl-go"
+	"github.com/samber/oops"
+
+	"github.com/aquasecurity/vex-collector/pkg/download"
+	"github.com/aquasecurity/vex-collector/pkg/manifest"
 )
 
 var (
@@ -23,42 +26,42 @@ var (
 	errNoStatement  = fmt.Errorf("no statements found")
 )
 
-type Source struct {
-	Path string `json:"path"`
-	URL  string `json:"url"`
-}
-
 func CrawlPackage(ctx context.Context, vexHubDir, url string, purl packageurl.PackageURL) error {
+	errBuilder := oops.In("crawl").With("purl", purl.String())
 	tmpDir, err := os.MkdirTemp("", "vexhub-crawler-*")
 	if err != nil {
-		return fmt.Errorf("failed to create a temporary directory: %w", err)
+		return errBuilder.Wrapf(err, "failed to create a temporary directory")
 	}
 	defer os.RemoveAll(tmpDir)
 
 	dst := filepath.Join(tmpDir, purl.Name)
 	if err = download.Download(ctx, url, dst); err != nil {
-		return fmt.Errorf("download error: %w", err)
+		return errBuilder.Wrapf(err, "download error")
 	}
 
 	permaLink := githubPermalink(dst)
+	if permaLink != nil {
+		errBuilder.With("permalink", permaLink.String())
+	}
 
 	vexDir := filepath.Join(vexHubDir, "pkg", purl.Type, purl.Namespace, purl.Name, purl.Subpath)
 	vexDir = filepath.Clean(filepath.ToSlash(vexDir))
+	errBuilder = errBuilder.With("dir", vexDir)
 
 	// Reset the directory
 	if err = os.RemoveAll(vexDir); err != nil {
-		return fmt.Errorf("failed to remove the directory: %w", err)
+		return errBuilder.Wrapf(err, "failed to remove the directory")
 	}
 	if err = os.MkdirAll(vexDir, 0755); err != nil {
-		return fmt.Errorf("failed to create a directory: %w", err)
+		return errBuilder.Wrapf(err, "failed to create a directory")
 	}
 
 	var found bool
-	var sources []Source
-	logger := slog.With("purl", purl.String(), "url", url)
+	var sources []manifest.Source
+	logger := slog.With(slog.String("purl", purl.String()), "url", url)
 	err = filepath.WalkDir(tmpDir, func(filePath string, d fs.DirEntry, err error) error {
 		if err != nil {
-			return fmt.Errorf("failed to walk the directory: %w", err)
+			return errBuilder.Wrapf(err, "failed to walk the directory")
 		} else if d.IsDir() {
 			if filepath.Base(filePath) == "testdata" || filepath.Base(filePath) == "test" {
 				slog.Debug("Skipping test directory", slog.String("path", filePath))
@@ -77,12 +80,13 @@ func CrawlPackage(ctx context.Context, vexHubDir, url string, purl packageurl.Pa
 			logger.Error("PURL does not match", slog.String("path", filePath))
 			return nil
 		} else if err != nil {
-			return fmt.Errorf("failed to validate VEX file: %w", err)
+			return errBuilder.Wrapf(err, "failed to validate VEX file")
 		}
 
 		found = true
-		if err = os.Rename(filePath, filepath.Join(vexDir, filepath.Base(filePath))); err != nil {
-			return fmt.Errorf("failed to move the file: %w", err)
+		to := filepath.Join(vexDir, filepath.Base(filePath))
+		if err = os.Rename(filePath, to); err != nil {
+			return errBuilder.With("from", filePath).With("to", to).Wrapf(err, "failed to rename")
 		}
 
 		if src := fileSource(dst, filePath, url, permaLink); src != nil {
@@ -92,13 +96,18 @@ func CrawlPackage(ctx context.Context, vexHubDir, url string, purl packageurl.Pa
 		return nil
 	})
 	if err != nil {
-		return fmt.Errorf("failed to walk the directory: %w", err)
+		return errBuilder.Wrapf(err, "failed to walk the directory")
 	}
 
 	if !found {
 		logger.Warn("No VEX file found")
 	}
-	if err = writeSources(sources, vexDir); err != nil {
+
+	m := manifest.Manifest{
+		ID:      purl.String(),
+		Sources: sources,
+	}
+	if err = manifest.Write(filepath.Join(vexDir, manifest.FileName), m); err != nil {
 		return fmt.Errorf("failed to write sources: %w", err)
 	}
 
@@ -168,14 +177,14 @@ func validateVEX(path, purl string) error {
 	return nil
 }
 
-func fileSource(root, filePath, url string, permaLink *url.URL) *Source {
+func fileSource(root, filePath, url string, permaLink *url.URL) *manifest.Source {
 	relPath, err := filepath.Rel(root, filePath)
 	if err != nil {
 		slog.Error("Failed to get the relative path", slog.String("path", filePath), slog.Any("err", err))
 		return nil
 	}
 
-	source := Source{
+	source := manifest.Source{
 		Path: filepath.Base(filePath),
 		URL:  url,
 	}
@@ -185,19 +194,4 @@ func fileSource(root, filePath, url string, permaLink *url.URL) *Source {
 		source.URL = l.String()
 	}
 	return &source
-}
-
-func writeSources(sources []Source, dir string) error {
-	f, err := os.Create(filepath.Join(dir, "sources.json"))
-	if err != nil {
-		return fmt.Errorf("failed to create sources file: %w", err)
-	}
-	defer f.Close()
-
-	e := json.NewEncoder(f)
-	e.SetIndent("", "    ")
-	if err = e.Encode(sources); err != nil {
-		return fmt.Errorf("JSON encode error: %w", err)
-	}
-	return nil
 }

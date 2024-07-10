@@ -4,11 +4,15 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/aquasecurity/vex-collector/pkg/crawl"
-	"github.com/aquasecurity/vex-collector/pkg/vexhub"
-	"github.com/lmittmann/tint"
+	"log"
 	"log/slog"
 	"os"
+
+	"github.com/lmittmann/tint"
+	"github.com/samber/oops"
+
+	"github.com/aquasecurity/vex-collector/pkg/crawl"
+	"github.com/aquasecurity/vex-collector/pkg/vexhub"
 )
 
 func init() {
@@ -18,7 +22,7 @@ func init() {
 
 func main() {
 	if err := run(); err != nil {
-		slog.Error("Unexpected error", slog.Any("err", err))
+		log.Fatalf("%+v", err)
 	}
 }
 
@@ -40,12 +44,12 @@ func run() error {
 
 	hub, err := vexhub.Load(*vexHubDir)
 	if err != nil {
-		return fmt.Errorf("failed to load sources: %w", err)
+		return oops.Wrapf(err, "failed to load")
 	}
 
 	if err = crawl.Packages(ctx, hub); err != nil {
-		return fmt.Errorf("failed to crawl packages: %w", err)
+		return oops.Wrapf(err, "failed to crawl packages")
 	}
 
-	return nil
+	return oops.Wrap(hub.GenerateIndex())
 }
