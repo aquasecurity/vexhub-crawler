@@ -1,0 +1,27 @@
+name: Test
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+
+    - name: Check out VEX Hub
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ github.repository_owner }}/vexhub
+        token: ${{ secrets.ORG_REPO_TOKEN }}
+        path: vexhub
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: go.mod
+
+    - name: Test
+      run: go run main.go -strict -vexhub-dir ./vexhub
