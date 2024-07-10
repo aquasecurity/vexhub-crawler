@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/aquasecurity/vex-collector/pkg/crawl/git"
-	"github.com/aquasecurity/vex-collector/pkg/crawl/vex"
-	"github.com/aquasecurity/vex-collector/pkg/vexhub"
-	"github.com/package-url/packageurl-go"
 	"net/http"
+
+	"github.com/package-url/packageurl-go"
+
+	"github.com/aquasecurity/vexhub-crawler/pkg/config"
+	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
+	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/vex"
 )
 
 const pypiAPI = "https://pypi.org/pypi"

@@ -17,8 +17,8 @@ import (
 	"github.com/package-url/packageurl-go"
 	"github.com/samber/oops"
 
-	"github.com/aquasecurity/vex-collector/pkg/download"
-	"github.com/aquasecurity/vex-collector/pkg/manifest"
+	"github.com/aquasecurity/vexhub-crawler/pkg/download"
+	"github.com/aquasecurity/vexhub-crawler/pkg/manifest"
 )
 
 var (
@@ -27,7 +27,7 @@ var (
 )
 
 func CrawlPackage(ctx context.Context, vexHubDir, url string, purl packageurl.PackageURL) error {
-	errBuilder := oops.In("crawl").With("purl", purl.String())
+	errBuilder := oops.In("crawl").With("purl", purl.String()).With("url", url)
 	tmpDir, err := os.MkdirTemp("", "vexhub-crawler-*")
 	if err != nil {
 		return errBuilder.Wrapf(err, "failed to create a temporary directory")
@@ -80,8 +80,7 @@ func CrawlPackage(ctx context.Context, vexHubDir, url string, purl packageurl.Pa
 
 		logger.Info("Parsing VEX file", slog.String("path", relPath))
 		if err = validateVEX(filePath, purl.String()); errors.Is(err, errNoStatement) {
-			logger.Error("No statements found", slog.String("path", relPath))
-			return nil
+			return errBuilder.With("path", relPath).Wrapf(err, "no statement found")
 		} else if errors.Is(err, errPURLMismatch) {
 			logger.Info("PURL does not match", slog.String("path", relPath))
 			return nil
@@ -106,7 +105,7 @@ func CrawlPackage(ctx context.Context, vexHubDir, url string, purl packageurl.Pa
 	}
 
 	if !found {
-		logger.Warn("No VEX file found")
+		return errBuilder.Wrapf(err, "no VEX file found")
 	}
 
 	m := manifest.Manifest{

@@ -4,15 +4,15 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"log"
 	"log/slog"
 	"os"
 
 	"github.com/lmittmann/tint"
 	"github.com/samber/oops"
 
-	"github.com/aquasecurity/vex-collector/pkg/crawl"
-	"github.com/aquasecurity/vex-collector/pkg/vexhub"
+	"github.com/aquasecurity/vexhub-crawler/pkg/config"
+	"github.com/aquasecurity/vexhub-crawler/pkg/crawl"
+	"github.com/aquasecurity/vexhub-crawler/pkg/vexhub"
 )
 
 func init() {

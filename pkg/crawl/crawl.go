@@ -2,15 +2,17 @@ package crawl
 
 import (
 	"context"
-	"github.com/aquasecurity/vex-collector/pkg/crawl/cargo"
-	"github.com/aquasecurity/vex-collector/pkg/crawl/golang"
-	"github.com/aquasecurity/vex-collector/pkg/crawl/maven"
-	"github.com/aquasecurity/vex-collector/pkg/crawl/npm"
-	"github.com/aquasecurity/vex-collector/pkg/crawl/oci"
-	"github.com/aquasecurity/vex-collector/pkg/crawl/pypi"
-	"github.com/aquasecurity/vex-collector/pkg/vexhub"
-	"github.com/package-url/packageurl-go"
 	"log/slog"
+
+	"github.com/package-url/packageurl-go"
+
+	"github.com/aquasecurity/vexhub-crawler/pkg/config"
+	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/cargo"
+	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/golang"
+	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/maven"
+	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/npm"
+	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/oci"
+	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/pypi"
 )
 
 type Crawler interface {

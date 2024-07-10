@@ -3,13 +3,15 @@ package golang
 import (
 	"context"
 	"fmt"
-	"github.com/aquasecurity/vex-collector/pkg/crawl/git"
-	"github.com/aquasecurity/vex-collector/pkg/crawl/vex"
-	"github.com/aquasecurity/vex-collector/pkg/vexhub"
-	"github.com/package-url/packageurl-go"
-	"golang.org/x/tools/go/vcs"
 	"path"
 	"strings"
+
+	"github.com/aquasecurity/vexhub-crawler/pkg/config"
+	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
+	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/vex"
+
+	"github.com/package-url/packageurl-go"
+	"golang.org/x/tools/go/vcs"
 )
 
 type Crawler struct {
@@ -20,13 +22,14 @@ func NewCrawler(rootDir string) *Crawler {
 	return &Crawler{rootDir: rootDir}
 }
 
-func (c *Crawler) Crawl(ctx context.Context, pkg vexhub.Package) error {
+func (c *Crawler) Crawl(ctx context.Context, pkg config.Package) error {
 	src := pkg.URL
 	if src == "" {
 		repoURL, err := c.detectSrc(pkg.PURL)
 		if err != nil {
 			return fmt.Errorf("failed to detect source: %w", err)
 		}
+		repoURL = strings.ReplaceAll(repoURL, "git::https://", "git::ssh://git@") // TODO: delete
 		src = repoURL
 	}
 	if err := vex.CrawlPackage(ctx, c.rootDir, src, pkg.PURL); err != nil {
