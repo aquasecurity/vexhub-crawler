@@ -63,25 +63,27 @@ func CrawlPackage(ctx context.Context, vexHubDir, url string, purl packageurl.Pa
 	var found bool
 	var sources []manifest.Source
 	logger := slog.With(slog.String("purl", purl.String()), "url", url)
-	err = filepath.WalkDir(tmpDir, func(filePath string, d fs.DirEntry, err error) error {
+	root := filepath.Join(dst, ".vex")
+	err = filepath.WalkDir(root, func(filePath string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return errBuilder.Wrapf(err, "failed to walk the directory")
 		} else if d.IsDir() {
-			if filepath.Base(filePath) == "testdata" || filepath.Base(filePath) == "test" {
-				slog.Debug("Skipping test directory", slog.String("path", filePath))
-				return filepath.SkipDir
-			}
 			return nil
 		} else if !matchPath(filePath) {
 			return nil
 		}
 
-		logger.Info("Parsing VEX file", slog.String("path", filePath))
+		relPath, err := filepath.Rel(dst, filePath) // Relative path from the repository root, not from ".vex/"
+		if err != nil {
+			return errBuilder.With("file_path", filePath).Wrapf(err, "failed to get the relative path")
+		}
+
+		logger.Info("Parsing VEX file", slog.String("path", relPath))
 		if err = validateVEX(filePath, purl.String()); errors.Is(err, errNoStatement) {
-			logger.Error("No statements found", slog.String("path", filePath))
+			logger.Error("No statements found", slog.String("path", relPath))
 			return nil
 		} else if errors.Is(err, errPURLMismatch) {
-			logger.Error("PURL does not match", slog.String("path", filePath))
+			logger.Info("PURL does not match", slog.String("path", relPath))
 			return nil
 		} else if err != nil {
 			return errBuilder.Wrapf(err, "failed to validate VEX file")
@@ -93,7 +95,7 @@ func CrawlPackage(ctx context.Context, vexHubDir, url string, purl packageurl.Pa
 			return errBuilder.With("from", filePath).With("to", to).Wrapf(err, "failed to rename")
 		}
 
-		if src := fileSource(dst, filePath, url, permaLink); src != nil {
+		if src := fileSource(relPath, url, permaLink); src != nil {
 			sources = append(sources, *src)
 		}
 
@@ -173,23 +175,17 @@ func validateVEX(path, purl string) error {
 	}
 	for _, statement := range v.Statements {
 		for _, product := range statement.Products {
-			if match := vex.PurlMatches(purl, product.ID); !match {
-				return errPURLMismatch
+			if vex.PurlMatches(purl, product.ID) {
+				return nil
 			}
 		}
 	}
-	return nil
+	return errPURLMismatch
 }
 
-func fileSource(root, filePath, url string, permaLink *url.URL) *manifest.Source {
-	relPath, err := filepath.Rel(root, filePath)
-	if err != nil {
-		slog.Error("Failed to get the relative path", slog.String("path", filePath), slog.Any("err", err))
-		return nil
-	}
-
+func fileSource(relPath, url string, permaLink *url.URL) *manifest.Source {
 	source := manifest.Source{
-		Path: filepath.Base(filePath),
+		Path: filepath.Base(relPath),
 		URL:  url,
 	}
 	if permaLink != nil {
