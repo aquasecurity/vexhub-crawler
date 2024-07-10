@@ -29,7 +29,6 @@ func (c *Crawler) Crawl(ctx context.Context, pkg config.Package) error {
 		if err != nil {
 			return fmt.Errorf("failed to detect source: %w", err)
 		}
-		repoURL = strings.ReplaceAll(repoURL, "git::https://", "git::ssh://git@") // TODO: delete
 		src = repoURL
 	}
 	if err := vex.CrawlPackage(ctx, c.rootDir, src, pkg.PURL); err != nil {

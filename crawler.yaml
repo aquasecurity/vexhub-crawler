@@ -1,4 +1,6 @@
 pkg:
+  pypi:
+    - name: django
   golang:
     - namespace: github.com/aquasecurity
       name: trivy
