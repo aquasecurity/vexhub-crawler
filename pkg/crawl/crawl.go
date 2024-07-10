@@ -18,6 +18,7 @@ import (
 type Options struct {
 	VEXHubDir string
 	Packages  []config.Package
+	Strict    bool
 }
 
 type Crawler interface {
@@ -47,7 +48,10 @@ func Packages(ctx context.Context, opts Options) error {
 		logger := slog.With(slog.String("type", pkg.PURL.Type), slog.String("purl", pkg.PURL.String()))
 		logger.Info("Crawling package")
 		if err := crawler.Crawl(ctx, pkg); err != nil {
-			return err
+			if opts.Strict {
+				return err
+			}
+			logger.Warn(err.Error(), slog.Any("error", err))
 		}
 	}
 	return nil
