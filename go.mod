@@ -1,4 +1,4 @@
-module github.com/aquasecurity/vex-collector
+module github.com/aquasecurity/vexhub-crawler
 
 go 1.22.3
 

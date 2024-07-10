@@ -1,6 +1,6 @@
-# vex-crawler
+# VEX Hub Crawler
 
-`vex-crawler` is a component of the [VEX Hub][vexhub] that automatically retrieves VEX documents from source repositories.
+`vexhub-crawler` is a component of the [VEX Hub][vexhub] that automatically retrieves VEX documents from source repositories.
 
 ## Overview
 
@@ -23,7 +23,7 @@ $ curl -s https://registry.npmjs.org/react | jq .repository.url
 "git+https://github.com/facebook/react.git"
 ```
 
-vex-crawler will automatically retrieve the VEX files stored in `https://github.com/facebook/react`.
+vexhub-crawler will automatically retrieve the VEX files stored in `https://github.com/facebook/react`.
 
 ### Go
 An HTTP access will be made to identify the repository from `go-import`.
@@ -91,7 +91,7 @@ https://github.com/aquasecurity/trivy
 
 ## Discovery of VEX Documents
 
-Once the source repository is identified (currently only git repositories are supported), `vex-crawler` searches for VEX documents in the `.vex/` directory at the root of the repository.
+Once the source repository is identified (currently only git repositories are supported), `vexhub-crawler` searches for VEX documents in the `.vex/` directory at the root of the repository.
 
 The crawler considers files matching the following patterns as VEX documents:
 

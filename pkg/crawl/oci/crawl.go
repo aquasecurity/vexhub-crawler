@@ -3,14 +3,17 @@ package oci
 import (
 	"context"
 	"fmt"
-	"github.com/aquasecurity/vex-collector/pkg/crawl/git"
-	"github.com/aquasecurity/vex-collector/pkg/crawl/vex"
-	"github.com/aquasecurity/vex-collector/pkg/vexhub"
+	"log/slog"
+
 	"github.com/google/go-containerregistry/pkg/name"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/package-url/packageurl-go"
-	"log/slog"
+	"github.com/samber/oops"
+
+	"github.com/aquasecurity/vexhub-crawler/pkg/config"
+	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
+	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/vex"
 )
 
 const imageSourceAnnotation = "org.opencontainers.image.source"
@@ -33,7 +36,7 @@ func (c *Crawler) Crawl(ctx context.Context, pkg vexhub.Package) error {
 		src = repoURL
 	}
 	if err := vex.CrawlPackage(ctx, c.rootDir, src, pkg.PURL); err != nil {
-		return fmt.Errorf("failed to crawl package: %w", err)
+		return oops.Wrapf(err, "failed to crawl package: %w")
 	}
 	return nil
 }
