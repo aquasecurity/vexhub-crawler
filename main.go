@@ -22,13 +22,16 @@ func init() {
 
 func main() {
 	if err := run(); err != nil {
-		log.Fatalf("%+v", err)
+		slog.Error("Fatal error")
+		fmt.Printf("%+v", err)
+		os.Exit(1)
 	}
 }
 
 func run() error {
 	ctx := context.Background()
 
+	configPath := flag.String("config", "crawler.yaml", "Crawler config")
 	vexHubDir := flag.String("vexhub-dir", "", "Vex Hub directory")
 	debug := flag.Bool("debug", false, "Enable debug logging")
 	flag.Parse()
@@ -42,14 +45,17 @@ func run() error {
 		})))
 	}
 
-	hub, err := vexhub.Load(*vexHubDir)
+	c, err := config.Load(*configPath)
 	if err != nil {
 		return oops.Wrapf(err, "failed to load")
 	}
 
-	if err = crawl.Packages(ctx, hub); err != nil {
+	if err = crawl.Packages(ctx, crawl.Options{
+		VEXHubDir: *vexHubDir,
+		Packages:  c.Packages,
+	}); err != nil {
 		return oops.Wrapf(err, "failed to crawl packages")
 	}
 
-	return oops.Wrap(hub.GenerateIndex())
+	return oops.Wrap(vexhub.GenerateIndex(*vexHubDir))
 }
