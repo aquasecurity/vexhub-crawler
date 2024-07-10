@@ -33,6 +33,7 @@ func run() error {
 
 	configPath := flag.String("config", "crawler.yaml", "Crawler config")
 	vexHubDir := flag.String("vexhub-dir", "", "Vex Hub directory")
+	strict := flag.Bool("strict", false, "Strict mode")
 	debug := flag.Bool("debug", false, "Enable debug logging")
 	flag.Parse()
 
@@ -53,6 +54,7 @@ func run() error {
 	if err = crawl.Packages(ctx, crawl.Options{
 		VEXHubDir: *vexHubDir,
 		Packages:  c.Packages,
+		Strict:    *strict,
 	}); err != nil {
 		return oops.Wrapf(err, "failed to crawl packages")
 	}
