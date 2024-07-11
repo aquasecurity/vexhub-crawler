@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"path"
+	"net/url"
 
 	"github.com/aquasecurity/vexhub-crawler/pkg/config"
 	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
@@ -19,21 +19,42 @@ type Response struct {
 	} `json:"repository"`
 }
 
-type Crawler struct{}
+type Crawler struct {
+	url string
+}
 
-func NewCrawler() *Crawler {
-	return &Crawler{}
+type Option func(*Crawler)
+
+func WithURL(url string) Option {
+	return func(c *Crawler) {
+		c.url = url
+	}
+}
+
+func NewCrawler(opts ...Option) *Crawler {
+	crawler := &Crawler{
+		url: npmAPI,
+	}
+	for _, opt := range opts {
+		opt(crawler)
+	}
+	return crawler
 }
 
 func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, error) {
-	pkgName := path.Join(pkg.PURL.Namespace, pkg.PURL.Name)
+	npmURL, err := url.JoinPath(c.url, pkg.PURL.Namespace, pkg.PURL.Name)
+	if err != nil {
+		return "", fmt.Errorf("failed to build package url: %w", err)
+	}
 
-	npmURL := npmAPI + pkgName
 	resp, err := http.Get(npmURL)
 	if err != nil {
 		return "", fmt.Errorf("failed to get package info: %w", err)
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("failed to get package info: %s", resp.Status)
+	}
 
 	var r Response
 	if err = json.NewDecoder(resp.Body).Decode(&r); err != nil {
