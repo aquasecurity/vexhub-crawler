@@ -19,16 +19,32 @@ type Response struct {
 	} `json:"repository"`
 }
 
-type Crawler struct{}
+type Crawler struct {
+	url string
+}
 
-func NewCrawler() *Crawler {
-	return &Crawler{}
+type Option func(*Crawler)
+
+func WithURL(url string) Option {
+	return func(c *Crawler) {
+		c.url = url
+	}
+}
+
+func NewCrawler(opts ...Option) *Crawler {
+	crawler := &Crawler{
+		url: npmAPI,
+	}
+	for _, opt := range opts {
+		opt(crawler)
+	}
+	return crawler
 }
 
 func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, error) {
 	pkgName := path.Join(pkg.PURL.Namespace, pkg.PURL.Name)
 
-	npmURL := npmAPI + pkgName
+	npmURL := c.url + pkgName
 	resp, err := http.Get(npmURL)
 	if err != nil {
 		return "", fmt.Errorf("failed to get package info: %w", err)
