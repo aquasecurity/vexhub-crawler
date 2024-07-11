@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/aquasecurity/vexhub-crawler/pkg/config"
 	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
+	"github.com/package-url/packageurl-go"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -62,6 +63,11 @@ func NewCrawler(opts ...Option) *Crawler {
 // as we didn't find a way to get the repository URL directly from the metadata.
 func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, error) {
 	purl := pkg.PURL
+
+	if purl.Type != packageurl.TypeMaven {
+		return "", fmt.Errorf("incorrect purl type for maven crawler: %s", purl.Type)
+	}
+
 	repoURL := c.url
 	if v, ok := purl.Qualifiers.Map()["repository_url"]; ok {
 		repoURL = v
