@@ -1,0 +1,62 @@
+{
+  "_id": "missed",
+  "_rev": "1-183ae8e55d797f384ed7da55d8e0962e",
+  "name": "missed",
+  "dist-tags": {
+    "latest": "0.0.0"
+  },
+  "versions": {
+    "0.0.0": {
+      "name": "missed",
+      "version": "0.0.0",
+      "description": "placeholder",
+      "_id": "missed@0.0.0",
+      "_npmVersion": "6.4.1",
+      "_nodeVersion": "11.0.0",
+      "_npmUser": {
+        "name": "abranhe",
+        "email": "abraham@abranhe.com"
+      },
+      "dist": {
+        "integrity": "sha512-rO2uzrlJImTlI2/EEsc8TrziYWJGhbZNWI96FSlkd5T20xtTN8qq3r9epWwplazoyR28cB4hNP2XI21GVhNpLg==",
+        "shasum": "8e9562e64fd2b5d005d6d1b00bc4d6d4e9cd1c42",
+        "tarball": "https://registry.npmjs.org/missed/-/missed-0.0.0.tgz",
+        "fileCount": 1,
+        "unpackedSize": 77,
+        "npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJb2n9nCRA9TVsSAnZWagAAI9IP/jqNXTBrjuEhar6tA/Nd\nam/MPLcI358F9hS30H6q04UN8M/zH6oXLhLUbFWkmX9sy3T1jYJ5lYZAJh9E\nX2WTBgSHUMMzs8DAHLQob0BgF3Aon+/QTk6N0vnNj4Td1l5jpY62eJXiLoqi\n+bRWbh5ivrA8GaJM2BjGgV0qlZjKvTp7f2vULDEf0gduKCeiD99mg/DexD1N\n1oYN+PrD0pmZFFsF0QT4964Aqr3bxMOlEZpr0M4vzgVxsSVVWDsCXXUE+UzW\n1Bjd0skYx2guYzfqZY5EIs3ZEMFkjGBrfArCb5yY7LNY+sXdPgC9+RNXJQ70\nGRbuJGO1DNd3snL6URrayBH/pMjoiiD6JabgkjXWZq0TON95sz4bf038XnO/\nMz5HNRTEzTdWlKzc7kL7WnY9m0v0UBWFOxQRT9fy3LfbNHxhLGaEzLectjoA\ni/ZmZnXCRLE+sMS91kEXT8wXHu9JnGK4Zoi8beiXUmMGYkxEnl7tdy+AWPa3\n31h5JODN7lS3gvg537W3+MnD5XhMegClAqEmGVKjRJkNWUH+/kyvYtmvOPq6\n7d2s93Si1QOQsWdL+Sp0GyC4xUMqibzTh48id0BABdOqW2/oKburMETf8Hox\nJR/MC8o24ZkDD6L8wqIxoHQGpwEn3IygZFUvudsn6oOj0aLmO++7Qoi31f30\nbYMr\r\n=9qz3\r\n-----END PGP SIGNATURE-----\r\n",
+        "signatures": [
+          {
+            "keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+            "sig": "MEUCIQCi4IOONcWD9za61pTWgXQ4nE3Mc3MS/Md+5y1BfaKdHgIgPS5tLb6nrzmqkK2o06eE4vjEvrRPt46PbVUOSX/OqVs="
+          }
+        ]
+      },
+      "maintainers": [
+        {
+          "name": "abranhe",
+          "email": "abraham@abranhe.com"
+        }
+      ],
+      "directories": {},
+      "_npmOperationalInternal": {
+        "host": "s3://npm-registry-packages",
+        "tmp": "tmp/missed_0.0.0_1541046118551_0.4178228583191774"
+      },
+      "_hasShrinkwrap": false
+    }
+  },
+  "time": {
+    "created": "2018-11-01T04:21:58.550Z",
+    "0.0.0": "2018-11-01T04:21:58.640Z",
+    "modified": "2022-05-09T11:19:21.599Z"
+  },
+  "maintainers": [
+    {
+      "name": "abranhe",
+      "email": "abraham@abranhe.com"
+    }
+  ],
+  "description": "placeholder",
+  "readme": "ERROR: No README data found!",
+  "readmeFilename": ""
+}

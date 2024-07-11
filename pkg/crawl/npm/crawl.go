@@ -8,7 +8,6 @@ import (
 	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
 	"net/http"
 	"net/url"
-	"path"
 )
 
 const npmAPI = "https://registry.npmjs.org/"
@@ -42,9 +41,7 @@ func NewCrawler(opts ...Option) *Crawler {
 }
 
 func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, error) {
-	pkgName := path.Join(pkg.PURL.Namespace, pkg.PURL.Name)
-
-	npmURL, err := url.JoinPath(c.url, pkgName)
+	npmURL, err := url.JoinPath(c.url, pkg.PURL.Namespace, pkg.PURL.Name)
 	if err != nil {
 		return "", fmt.Errorf("failed to build package url: %w", err)
 	}

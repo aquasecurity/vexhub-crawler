@@ -40,12 +40,11 @@ func TestCrawler_DetectSrc(t *testing.T) {
 			want: "git::https://github.com/babel/babel.git?depth=1",
 		},
 		{
-			// `Repository` has been manually removed for this test
 			name: "sad path with empty repo",
 			pkg: config.Package{
 				PURL: packageurl.PackageURL{
 					Type: packageurl.TypeNPM,
-					Name: "ms",
+					Name: "missed",
 				},
 			},
 			wantErr: "no repository URL found",
@@ -55,7 +54,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 			pkg: config.Package{
 				PURL: packageurl.PackageURL{
 					Type: packageurl.TypeNPM,
-					Name: "missed",
+					Name: "wrong-package",
 				},
 			},
 			wantErr: "failed to get package info: 404 Not Found",
