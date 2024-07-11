@@ -50,6 +50,9 @@ func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, erro
 		return "", fmt.Errorf("failed to get package info: %w", err)
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("failed to get package info: %s", resp.Status)
+	}
 
 	var r Response
 	if err = json.NewDecoder(resp.Body).Decode(&r); err != nil {
