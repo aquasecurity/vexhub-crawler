@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-const defaultRepo = "https://repo.maven.apache.org/maven2"
+const mavenRepo = "https://repo.maven.apache.org/maven2"
 
 // Metadata represents maven-metadata.xml
 type Metadata struct {
@@ -35,10 +35,26 @@ type Scm struct {
 	URL string `xml:"url"`
 }
 
-type Crawler struct{}
+type Crawler struct {
+	url string
+}
 
-func NewCrawler() *Crawler {
-	return &Crawler{}
+type Option func(*Crawler)
+
+func WithURL(url string) Option {
+	return func(c *Crawler) {
+		c.url = url
+	}
+}
+
+func NewCrawler(opts ...Option) *Crawler {
+	crawler := &Crawler{
+		url: mavenRepo,
+	}
+	for _, opt := range opts {
+		opt(crawler)
+	}
+	return crawler
 }
 
 // DetectSrc detects the source repository URL of the package.
@@ -46,7 +62,7 @@ func NewCrawler() *Crawler {
 // as we didn't find a way to get the repository URL directly from the metadata.
 func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, error) {
 	purl := pkg.PURL
-	repoURL := defaultRepo
+	repoURL := c.url
 	if v, ok := purl.Qualifiers.Map()["repository_url"]; ok {
 		repoURL = v
 	}
