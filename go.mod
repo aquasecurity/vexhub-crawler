@@ -10,6 +10,7 @@ require (
 	github.com/openvex/go-vex v0.2.5
 	github.com/package-url/packageurl-go v0.1.3
 	github.com/samber/oops v1.12.0
+	github.com/sosedoff/gitkit v0.4.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/tools/go/vcs v0.1.0-deprecated
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2
@@ -38,6 +39,7 @@ require (
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.5.0 // indirect
+	github.com/gofrs/uuid v4.0.0+incompatible // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
