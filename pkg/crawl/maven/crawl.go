@@ -4,14 +4,13 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
+	"github.com/aquasecurity/vexhub-crawler/pkg/config"
+	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
 	"log/slog"
 	"net/http"
 	"net/url"
 	"path"
 	"strings"
-
-	"github.com/aquasecurity/vexhub-crawler/pkg/config"
-	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
 )
 
 const defaultRepo = "https://repo.maven.apache.org/maven2"
@@ -42,10 +41,10 @@ func NewCrawler() *Crawler {
 	return &Crawler{}
 }
 
-// detectSrc detects the source repository URL of the package.
+// DetectSrc detects the source repository URL of the package.
 // It fetches the latest version and POM file to extract the repository URL
 // as we didn't find a way to get the repository URL directly from the metadata.
-func (c *Crawler) DetectSrc(ctx context.Context, pkg config.Package) (string, error) {
+func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, error) {
 	purl := pkg.PURL
 	repoURL := defaultRepo
 	if v, ok := purl.Qualifiers.Map()["repository_url"]; ok {
@@ -57,9 +56,10 @@ func (c *Crawler) DetectSrc(ctx context.Context, pkg config.Package) (string, er
 		return "", fmt.Errorf("failed to parse repository URL: %w", err)
 	}
 
-	pkgName := path.Join(purl.Namespace, purl.Name)
-	pkgName = strings.ReplaceAll(pkgName, ".", "/")
-	baseURL.Path = path.Join(baseURL.Path, pkgName)
+	// GroupID (purl.Name) can contain `.`.
+	// e.g. pkg:maven/ai.catboost/catboost-spark-aggregate_2.11@1.2.5 => https://repo.maven.apache.org/maven2/ai/catboost/catboost-spark-aggregate_2.11/1.2.5/
+	namespace := strings.ReplaceAll(purl.Namespace, ".", "/")
+	baseURL.Path = path.Join(baseURL.Path, namespace, purl.Name)
 
 	latest, err := c.fetchLatestVersion(baseURL)
 	if err != nil {
