@@ -2,7 +2,6 @@ package maven_test
 
 import (
 	"context"
-	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/maven"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
@@ -12,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/aquasecurity/vexhub-crawler/pkg/config"
+	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/maven"
 )
 
 func TestCrawler_DetectSrc(t *testing.T) {

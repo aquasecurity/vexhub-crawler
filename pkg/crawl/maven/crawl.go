@@ -4,14 +4,16 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
-	"github.com/aquasecurity/vexhub-crawler/pkg/config"
-	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
-	"github.com/package-url/packageurl-go"
 	"log/slog"
 	"net/http"
 	"net/url"
 	"path"
 	"strings"
+
+	"github.com/package-url/packageurl-go"
+
+	"github.com/aquasecurity/vexhub-crawler/pkg/config"
+	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
 )
 
 const mavenRepo = "https://repo.maven.apache.org/maven2"
