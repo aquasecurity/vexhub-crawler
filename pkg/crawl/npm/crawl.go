@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/aquasecurity/vexhub-crawler/pkg/config"
-	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
 	"net/http"
 	"net/url"
+
+	"github.com/aquasecurity/vexhub-crawler/pkg/config"
+	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
 )
 
 const npmAPI = "https://registry.npmjs.org/"

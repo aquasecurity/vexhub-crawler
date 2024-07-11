@@ -2,13 +2,15 @@ package npm_test
 
 import (
 	"context"
-	"github.com/aquasecurity/vexhub-crawler/pkg/config"
-	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/npm"
-	"github.com/package-url/packageurl-go"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/package-url/packageurl-go"
+	"github.com/stretchr/testify/require"
+
+	"github.com/aquasecurity/vexhub-crawler/pkg/config"
+	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/npm"
 )
 
 func TestCrawler_DetectSrc(t *testing.T) {
