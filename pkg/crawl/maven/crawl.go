@@ -92,9 +92,12 @@ func (c *Crawler) fetchLatestVersion(baseURL *url.URL) (string, error) {
 
 	resp, err := http.Get(metaURL.String())
 	if err != nil {
-		return "", fmt.Errorf("failed to get package info: %w", err)
+		return "", fmt.Errorf("failed to get artifact metadata: %w", err)
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("failed to get artifact metadata: %s", resp.Status)
+	}
 
 	var metadata Metadata
 	if err = xml.NewDecoder(resp.Body).Decode(&metadata); err != nil {
@@ -117,6 +120,9 @@ func (c *Crawler) fetchPOM(baseURL *url.URL, name, latest string) (*POM, error) 
 		return nil, fmt.Errorf("failed to get package info: %w", err)
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to get pom file: %s", resp.Status)
+	}
 
 	var pom POM
 	if err = xml.NewDecoder(resp.Body).Decode(&pom); err != nil {
