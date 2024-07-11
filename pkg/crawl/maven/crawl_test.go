@@ -81,17 +81,6 @@ func TestCrawler_DetectSrc(t *testing.T) {
 			want: "git::https://github.com/catboost/catboost.git?depth=1",
 		},
 		{
-			name: "sad path with incorrect purl type",
-			pkg: config.Package{
-				PURL: packageurl.PackageURL{
-					Type:      packageurl.TypeNPM,
-					Namespace: "@babel",
-					Name:      "parser",
-				},
-			},
-			wantErr: "incorrect purl type for maven crawler",
-		},
-		{
 			name:    "sad path when maven-metadata.xml doesn't exist",
 			repoDir: filepath.Join("testdata", "no-exist"),
 			pkg: config.Package{
@@ -172,31 +161,33 @@ func TestCrawler_DetectSrc(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			fs := http.FileServer(http.Dir(tt.repoDir))
-			ts := httptest.NewServer(fs)
-			t.Cleanup(ts.Close)
+		t.Run(
+			tt.name, func(t *testing.T) {
+				fs := http.FileServer(http.Dir(tt.repoDir))
+				ts := httptest.NewServer(fs)
+				t.Cleanup(ts.Close)
 
-			withUrl := maven.WithURL(ts.URL)
-			if len(tt.pkg.PURL.Qualifiers) > 0 {
-				tt.pkg.PURL.Qualifiers = []packageurl.Qualifier{
-					{
-						Key:   "repository_url",
-						Value: ts.URL,
-					},
+				withUrl := maven.WithURL(ts.URL)
+				if len(tt.pkg.PURL.Qualifiers) > 0 {
+					tt.pkg.PURL.Qualifiers = []packageurl.Qualifier{
+						{
+							Key:   "repository_url",
+							Value: ts.URL,
+						},
+					}
+					withUrl = maven.WithURL("wrong-url")
 				}
-				withUrl = maven.WithURL("wrong-url")
-			}
 
-			crawler := maven.NewCrawler(withUrl)
-			got, err := crawler.DetectSrc(context.Background(), tt.pkg)
-			if tt.wantErr != "" {
-				require.ErrorContains(t, err, tt.wantErr)
-				return
-			}
+				crawler := maven.NewCrawler(withUrl)
+				got, err := crawler.DetectSrc(context.Background(), tt.pkg)
+				if tt.wantErr != "" {
+					require.ErrorContains(t, err, tt.wantErr)
+					return
+				}
 
-			require.NoError(t, err)
-			require.Equal(t, tt.want, got)
-		})
+				require.NoError(t, err)
+				require.Equal(t, tt.want, got)
+			},
+		)
 	}
 }

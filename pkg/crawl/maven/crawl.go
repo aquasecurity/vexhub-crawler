@@ -10,8 +10,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/package-url/packageurl-go"
-
 	"github.com/aquasecurity/vexhub-crawler/pkg/config"
 	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
 )
@@ -66,10 +64,6 @@ func NewCrawler(opts ...Option) *Crawler {
 func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, error) {
 	purl := pkg.PURL
 
-	if purl.Type != packageurl.TypeMaven {
-		return "", fmt.Errorf("incorrect purl type for maven crawler: %s", purl.Type)
-	}
-
 	repoURL := c.url
 	if v, ok := purl.Qualifiers.Map()["repository_url"]; ok {
 		repoURL = v
@@ -89,8 +83,10 @@ func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, erro
 	if err != nil {
 		return "", fmt.Errorf("failed to fetch the latest version: %w", err)
 	}
-	slog.Info("Latest version found",
-		slog.String("purl", purl.String()), slog.String("version", latest))
+	slog.Info(
+		"Latest version found",
+		slog.String("purl", purl.String()), slog.String("version", latest),
+	)
 
 	pom, err := c.fetchPOM(baseURL, purl.Name, latest)
 	if err != nil {
