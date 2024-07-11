@@ -1,0 +1,62 @@
+{
+  "_id": "debug",
+  "_rev": "951-7994d290e4e2cbeeade8d5b886e10bc6",
+  "name": "debug",
+  "description": "Lightweight debugging utility for Node.js and the browser",
+  "dist-tags": {
+    "latest": "4.3.5"
+  },
+  "maintainers": [
+    {
+      "name": "qix",
+      "email": "josh@junon.me"
+    },
+    {
+      "name": "thebigredgeek",
+      "email": "rhyneandrew@gmail.com"
+    },
+    {
+      "name": "tootallnate",
+      "email": "nathan@tootallnate.net"
+    },
+    {
+      "name": "tjholowaychuk",
+      "email": "tj@vision-media.ca"
+    }
+  ],
+  "author": {
+    "url": "https://github.com/qix-",
+    "name": "Josh Junon"
+  },
+  "repository": {
+    "url": "git://github.com/debug-js/debug.git",
+    "type": "git"
+  },
+  "keywords": [
+    "debug",
+    "log",
+    "debugger"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/debug-js/debug#readme",
+  "bugs": {
+    "url": "https://github.com/debug-js/debug/issues"
+  },
+  "readme": "omitted for test",
+  "readmeFilename": "README.md",
+  "contributors": [
+    {
+      "name": "TJ Holowaychuk",
+      "email": "tj@vision-media.ca"
+    },
+    {
+      "url": "http://n8.io",
+      "name": "Nathan Rajlich",
+      "email": "nathan@tootallnate.net"
+    },
+    {
+      "name": "Andrew Rhyne",
+      "email": "rhyneandrew@gmail.com"
+    }
+  ]
+}
