@@ -14,7 +14,7 @@ import (
 	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
 )
 
-const defaultRepo = "https://repo.maven.apache.org/maven2"
+const mavenRepo = "https://repo.maven.apache.org/maven2"
 
 // Metadata represents maven-metadata.xml
 type Metadata struct {
@@ -36,18 +36,35 @@ type Scm struct {
 	URL string `xml:"url"`
 }
 
-type Crawler struct{}
-
-func NewCrawler() *Crawler {
-	return &Crawler{}
+type Crawler struct {
+	url string
 }
 
-// detectSrc detects the source repository URL of the package.
+type Option func(*Crawler)
+
+func WithURL(url string) Option {
+	return func(c *Crawler) {
+		c.url = url
+	}
+}
+
+func NewCrawler(opts ...Option) *Crawler {
+	crawler := &Crawler{
+		url: mavenRepo,
+	}
+	for _, opt := range opts {
+		opt(crawler)
+	}
+	return crawler
+}
+
+// DetectSrc detects the source repository URL of the package.
 // It fetches the latest version and POM file to extract the repository URL
 // as we didn't find a way to get the repository URL directly from the metadata.
-func (c *Crawler) DetectSrc(ctx context.Context, pkg config.Package) (string, error) {
+func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, error) {
 	purl := pkg.PURL
-	repoURL := defaultRepo
+
+	repoURL := c.url
 	if v, ok := purl.Qualifiers.Map()["repository_url"]; ok {
 		repoURL = v
 	}
@@ -57,16 +74,19 @@ func (c *Crawler) DetectSrc(ctx context.Context, pkg config.Package) (string, er
 		return "", fmt.Errorf("failed to parse repository URL: %w", err)
 	}
 
-	pkgName := path.Join(purl.Namespace, purl.Name)
-	pkgName = strings.ReplaceAll(pkgName, ".", "/")
-	baseURL.Path = path.Join(baseURL.Path, pkgName)
+	// GroupID (purl.Name) can contain `.`.
+	// e.g. pkg:maven/ai.catboost/catboost-spark-aggregate_2.11@1.2.5 => https://repo.maven.apache.org/maven2/ai/catboost/catboost-spark-aggregate_2.11/1.2.5/
+	namespace := strings.ReplaceAll(purl.Namespace, ".", "/")
+	baseURL.Path = path.Join(baseURL.Path, namespace, purl.Name)
 
 	latest, err := c.fetchLatestVersion(baseURL)
 	if err != nil {
 		return "", fmt.Errorf("failed to fetch the latest version: %w", err)
 	}
-	slog.Info("Latest version found",
-		slog.String("purl", purl.String()), slog.String("version", latest))
+	slog.Info(
+		"Latest version found",
+		slog.String("purl", purl.String()), slog.String("version", latest),
+	)
 
 	pom, err := c.fetchPOM(baseURL, purl.Name, latest)
 	if err != nil {
@@ -92,9 +112,12 @@ func (c *Crawler) fetchLatestVersion(baseURL *url.URL) (string, error) {
 
 	resp, err := http.Get(metaURL.String())
 	if err != nil {
-		return "", fmt.Errorf("failed to get package info: %w", err)
+		return "", fmt.Errorf("failed to get artifact metadata: %w", err)
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("failed to get artifact metadata: %s", resp.Status)
+	}
 
 	var metadata Metadata
 	if err = xml.NewDecoder(resp.Body).Decode(&metadata); err != nil {
@@ -117,6 +140,9 @@ func (c *Crawler) fetchPOM(baseURL *url.URL, name, latest string) (*POM, error) 
 		return nil, fmt.Errorf("failed to get package info: %w", err)
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to get pom file: %s", resp.Status)
+	}
 
 	var pom POM
 	if err = xml.NewDecoder(resp.Body).Decode(&pom); err != nil {
