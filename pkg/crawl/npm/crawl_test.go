@@ -68,7 +68,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 			ts := httptest.NewServer(fs)
 			t.Cleanup(ts.Close)
 
-			crawler := npm.NewCrawler(npm.WithURL(ts.URL + "/"))
+			crawler := npm.NewCrawler(npm.WithURL(ts.URL))
 			got, err := crawler.DetectSrc(context.Background(), tt.pkg)
 			if tt.wantErr != "" {
 				require.ErrorContains(t, err, tt.wantErr)
