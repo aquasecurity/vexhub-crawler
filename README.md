@@ -7,6 +7,55 @@
 The crawler identifies source repositories from registered [PURLs (Package URLs)][purl] and copies VEX documents into VEX Hub.
 This process ensures that VEX Hub maintains an up-to-date collection of VEX documents for various software packages.
 
+## Registering PURLs
+
+VEX Hub maintains [a list of PURLs](./crawler.yaml) for discovering VEX documents.
+The PURL definition file format is as follows:
+
+```yaml
+pkg:
+  npm:
+    - namespace: "@angular"
+      name: animations
+  golang:
+    - name: github.com/aquasecurity/trivy
+  pypi:
+    - name: django
+  maven:
+    - namespace: org.junit.jupiter
+      name: junit-jupiter-api
+  oci:
+    - name: trivy
+      qualifiers:
+         - key: repository_url
+           value: index.docker.io/aquasec/trivy
+    - name: trivy
+      qualifiers:
+        - key: repository_url
+          value: ghcr.io/aquasecurity/trivy
+```
+
+When specifying PURLs, the following components are required:
+
+* type
+* name
+
+The `version` must be omitted.
+The `namespace`, `qualifiers` and `subpath` may be necessary for certain ecosystems, such as `oci`.
+For detailed information about PURL composition, please refer to the PURL [specification](https://github.com/package-url/purl-spec/blob/b33dda1cf4515efa8eabbbe8e9b140950805f845/PURL-SPECIFICATION.rst).
+
+[The list of PURLs](./crawler.yaml) can be updated by anyone through Pull Requests.
+If VEX documents are already stored in the source repository of an open-source project, individuals other than the project's maintainers are welcome to register the PURL in VEX Hub.
+
+Currently, the crawler supports the following ecosystems:
+
+- npm
+- Go
+- PyPI
+- Maven
+- Cargo
+- OCI
+
 ## Identifying Source Repositories
 
 The method for identifying source repositories varies by ecosystem:
@@ -125,6 +174,18 @@ VEX documents with different product IDs, such as `pkg:npm/foobar@12.3.1`, will 
 
 This approach ensures that only relevant and trustworthy VEX documents are included in VEX Hub.
 
+## Future Work
+### More Reliable Source Repository Resolution
+
+Currently, VEX Hub Crawler uses registry APIs to identify package source repositories.
+However, this approach has potential security risks as repository information can be freely set by package maintainers, making it susceptible to tampering.
+
+To address this challenge, we are considering using provenance attestation for more reliable source repository resolution in the future.
+Provenance attestation allows for obtaining the actual repository URL where a package was built in a trustworthy manner, enabling cryptographic verification of the relationship between a package's source code and its published artifacts.
+
+Notably, npm has already implemented provenance in its registry.
+This implementation makes it possible to retrieve the source repository information directly from the PURL using provenance data.
+We believe this approach can enhance the trustworthiness of the source repository resolution process for packages.
 
 [vexhub]: https://github.com/aquasecurity/vexhub
 [purl]: https://github.com/package-url/purl-spec
