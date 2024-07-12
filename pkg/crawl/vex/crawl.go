@@ -184,7 +184,7 @@ func validateVEX(path, purl string) error {
 
 func fileSource(relPath, url string, permaLink *url.URL) *manifest.Source {
 	url = strings.TrimPrefix(url, "git::")
-	url = strings.TrimPrefix(url, "?depth=1")
+	url = strings.TrimSuffix(url, "?depth=1")
 	source := manifest.Source{
 		Path: filepath.Base(relPath),
 		URL:  url,
