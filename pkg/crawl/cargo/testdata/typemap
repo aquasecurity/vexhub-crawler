@@ -1,0 +1,31 @@
+{
+  "categories": [],
+  "crate": {
+    "badges": [],
+    "categories": [],
+    "created_at": "2014-11-11T06:07:42.392263+00:00",
+    "description": "A typesafe store for many value types.",
+    "documentation": null,
+    "downloads": 4997655,
+    "exact_match": false,
+    "homepage": null,
+    "id": "typemap",
+    "keywords": [],
+    "links": {
+      "owner_team": "/api/v1/crates/typemap/owner_team",
+      "owner_user": "/api/v1/crates/typemap/owner_user",
+      "owners": "/api/v1/crates/typemap/owners",
+      "reverse_dependencies": "/api/v1/crates/typemap/reverse_dependencies",
+      "version_downloads": "/api/v1/crates/typemap/downloads",
+      "versions": null
+    },
+    "max_stable_version": "0.3.3",
+    "max_version": "0.3.3",
+    "name": "typemap",
+    "newest_version": "0.3.3",
+    "recent_downloads": 279575,
+    "repository": "https://github.com/reem/rust-typemap",
+    "updated_at": "2015-12-16T00:01:49.263868+00:00"
+  },
+  "keywords": []
+}
