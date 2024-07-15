@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "mediaType": "application/vnd.oci.image.manifest.v1+json",
+  "config": {
+    "mediaType": "application/vnd.oci.image.config.v1+json",
+    "size": 124,
+    "digest": "sha256:6bb188bf204a2f204f62370411e821cce4a52972ab1195e2a91b3ac4aee33491"
+  },
+  "annotations": {
+    "org.opencontainers.image.source": "https://github.com/aquasecurity/trivy"
+  }
+}
