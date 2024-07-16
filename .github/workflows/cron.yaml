@@ -1,4 +1,4 @@
-name: Update vexhub
+name: Update VEX Hub
 on:
   schedule:
     - cron: "0 0 * * *" # Every day
@@ -6,7 +6,7 @@ on:
 
 jobs:
   update:
-    name: Update vexhub
+    name: Update VEX Hub
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.ORG_REPO_TOKEN }}
