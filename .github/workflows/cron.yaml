@@ -23,7 +23,7 @@ jobs:
       - name: Check out vexhub repo
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository_owner }}/${{ env.VEXHUB_DIR }}
+          repository: ${{ github.repository_owner }}/vexhub
           token: ${{ secrets.ORG_REPO_TOKEN }}
           path: ${{ env.VEXHUB_DIR }}
 
