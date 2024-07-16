@@ -44,7 +44,7 @@ func normalizeGitHubURL(u *url.URL) {
 	parts := strings.Split(u.Path, "/")
 
 	// e.g. /<owner>/<repo>/tree/<ref>/<subpath1>/<subpath2>
-	if len(parts) <= 5 {
+	if len(parts) < 5 {
 		return
 	}
 
@@ -57,7 +57,7 @@ func normalizeGitHubURL(u *url.URL) {
 		u.RawQuery = q.Encode()
 	}
 
-	if len(parts) <= 6 {
+	if len(parts) < 6 {
 		return
 	}
 
