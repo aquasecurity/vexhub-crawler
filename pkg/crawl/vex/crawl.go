@@ -53,11 +53,8 @@ func CrawlPackage(ctx context.Context, vexHubDir, url string, purl packageurl.Pa
 	errBuilder = errBuilder.With("dir", vexDir)
 
 	// Reset the directory
-	if err = os.RemoveAll(vexDir); err != nil {
-		return errBuilder.Wrapf(err, "failed to remove the directory")
-	}
-	if err = os.MkdirAll(vexDir, 0755); err != nil {
-		return errBuilder.Wrapf(err, "failed to create a directory")
+	if err = resetDir(vexDir); err != nil {
+		return errBuilder.Wrapf(err, "failed to reset the directory")
 	}
 
 	var found bool
@@ -106,6 +103,15 @@ func CrawlPackage(ctx context.Context, vexHubDir, url string, purl packageurl.Pa
 
 	if !found {
 		return errBuilder.Errorf("no VEX file found")
+	}
+
+	// Check if there are any changes in the VEX directory.
+	// If there are no changes, we don't need to update the manifest.json file.
+	// Since manifest.json has permalink pointing to the default branch,
+	// it's frequently updated even if there are no changes in the VEX directory.
+	if changed, err := hasVEXChanges(vexHubDir, vexDir); err == nil && !changed {
+		logger.Info("No changes in the VEX directory")
+		return nil
 	}
 
 	m := manifest.Manifest{
@@ -195,4 +201,65 @@ func fileSource(relPath, url string, permaLink *url.URL) *manifest.Source {
 		source.URL = l.String()
 	}
 	return &source
+}
+
+// resetDir removes all files other than manifest.json in the directory and creates a new directory.
+func resetDir(dir string) error {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return oops.Wrapf(err, "failed to read the directory")
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() && entry.Name() == manifest.FileName {
+			continue
+		}
+		if err = os.RemoveAll(entry.Name()); err != nil {
+			return oops.With("file_path", entry.Name()).Wrapf(err, "failed to remove the directory")
+		}
+	}
+	if err = os.MkdirAll(dir, 0755); err != nil {
+		return oops.With("dir", dir).Wrapf(err, "failed to create a director")
+	}
+	return nil
+}
+
+// hasVEXChanges checks if there are any changes in the .vex/ directory excluding the manifest.json file
+func hasVEXChanges(vexHubDir, vexDir string) (bool, error) {
+	errBuilder := oops.In("git_error").With("vex_hub_dir", vexHubDir).With("dir", vexDir)
+	// Open the repository
+	repo, err := git.PlainOpen(vexHubDir)
+	if err != nil {
+		return false, errBuilder.Wrapf(err, "open git repository")
+	}
+
+	// Get the worktree
+	wt, err := repo.Worktree()
+	if err != nil {
+		return false, errBuilder.Wrapf(err, "git worktree")
+	}
+
+	// Get the current status
+	status, err := wt.Status()
+	if err != nil {
+		return false, errBuilder.Wrapf(err, "git status")
+	}
+
+	// Get the relative path of vexDir from vexHubDir
+	relVexDir, err := filepath.Rel(vexHubDir, vexDir)
+	if err != nil {
+		return false, errBuilder.Wrapf(err, "relative path")
+	}
+
+	// Check for changes in vexDir excluding manifest.json
+	for filePath, fileStatus := range status {
+		// Check if the file is within vexDir
+		if strings.HasPrefix(filePath, relVexDir) {
+			// Exclude manifest.json
+			if filepath.Base(filePath) != manifest.FileName && fileStatus.Staging != git.Unmodified {
+				return true, nil
+			}
+		}
+	}
+
+	return false, nil
 }
