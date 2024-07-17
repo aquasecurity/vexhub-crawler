@@ -2,23 +2,22 @@ package download
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"maps"
 	"os"
 
-	"golang.org/x/xerrors"
-
 	"github.com/hashicorp/go-getter"
+	"github.com/samber/oops"
 )
 
 // Download downloads the configured source to the destination.
 func Download(ctx context.Context, src, dst string) error {
 	slog.Info("Downloading...", slog.String("src", src))
+	errBuilder := oops.Code("download_error").In("download").With("src", src).With("dst", dst)
 
 	pwd, err := os.Getwd()
 	if err != nil {
-		return fmt.Errorf("failed to get the current working directory: %w", err)
+		return errBuilder.Wrapf(err, "failed to get the current working directory")
 	}
 
 	// Build the client
@@ -32,7 +31,7 @@ func Download(ctx context.Context, src, dst string) error {
 	}
 
 	if err = client.Get(); err != nil {
-		return xerrors.Errorf("download error: %w", err)
+		return errBuilder.Wrapf(err, "download error")
 	}
 
 	return nil
