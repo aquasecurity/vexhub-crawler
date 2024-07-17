@@ -10,6 +10,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/samber/oops"
+
 	"github.com/aquasecurity/vexhub-crawler/pkg/config"
 	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
 )
@@ -62,6 +64,8 @@ func NewCrawler(opts ...Option) *Crawler {
 // It fetches the latest version and POM file to extract the repository URL
 // as we didn't find a way to get the repository URL directly from the metadata.
 func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, error) {
+	errBuilder := oops.Code("crawl_error").In("maven").With("purl", pkg.PURL.String())
+
 	purl := pkg.PURL
 
 	repoURL := c.url
@@ -71,7 +75,7 @@ func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, erro
 
 	baseURL, err := url.Parse(repoURL)
 	if err != nil {
-		return "", fmt.Errorf("failed to parse repository URL: %w", err)
+		return "", errBuilder.Wrapf(err, "failed to parse repository URL")
 	}
 
 	// GroupID (purl.Name) can contain `.`.
@@ -81,7 +85,7 @@ func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, erro
 
 	latest, err := c.fetchLatestVersion(baseURL)
 	if err != nil {
-		return "", fmt.Errorf("failed to fetch the latest version: %w", err)
+		return "", errBuilder.Wrapf(err, "failed to fetch the latest version")
 	}
 	slog.Info(
 		"Latest version found",
@@ -90,17 +94,17 @@ func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, erro
 
 	pom, err := c.fetchPOM(baseURL, purl.Name, latest)
 	if err != nil {
-		return "", fmt.Errorf("failed to fetch POM: %w", err)
+		return "", errBuilder.Wrapf(err, "failed to fetch POM")
 	}
 
 	srcURL, err := c.extractScrURL(pom)
 	if err != nil {
-		return "", fmt.Errorf("failed to extract repository URL: %w", err)
+		return "", errBuilder.Wrapf(err, "failed to extract repository URL")
 	}
 
 	u, err := git.NormalizeURL(srcURL)
 	if err != nil {
-		return "", fmt.Errorf("failed to normalize URL: %w", err)
+		return "", errBuilder.Wrapf(err, "failed to normalize URL")
 	}
 
 	return u.String(), nil
@@ -110,22 +114,24 @@ func (c *Crawler) fetchLatestVersion(baseURL *url.URL) (string, error) {
 	metaURL := *baseURL
 	metaURL.Path = path.Join(metaURL.Path, "maven-metadata.xml")
 
+	errBuilder := oops.Code("fetch_latest_version_error").With("metadata url", metaURL.String())
+
 	resp, err := http.Get(metaURL.String())
 	if err != nil {
-		return "", fmt.Errorf("failed to get artifact metadata: %w", err)
+		return "", errBuilder.Wrapf(err, "failed to get artifact metadata")
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("failed to get artifact metadata: %s", resp.Status)
+		return "", errBuilder.Errorf("failed to get artifact metadata: %s", resp.Status)
 	}
 
 	var metadata Metadata
 	if err = xml.NewDecoder(resp.Body).Decode(&metadata); err != nil {
-		return "", fmt.Errorf("failed to decode response: %w", err)
+		return "", errBuilder.Wrapf(err, "failed to decode response")
 	}
 
 	if metadata.Versioning.Latest == "" {
-		return "", fmt.Errorf("no latest version found")
+		return "", errBuilder.Errorf("no latest version found")
 	}
 
 	return metadata.Versioning.Latest, nil
@@ -135,18 +141,19 @@ func (c *Crawler) fetchPOM(baseURL *url.URL, name, latest string) (*POM, error) 
 	pomURL := *baseURL
 	pomURL.Path = path.Join(pomURL.Path, latest, fmt.Sprintf("%s-%s.pom", name, latest))
 
+	errBuilder := oops.Code("fetch_pom_error").With("pom url", pomURL.String())
 	resp, err := http.Get(pomURL.String())
 	if err != nil {
-		return nil, fmt.Errorf("failed to get package info: %w", err)
+		return nil, errBuilder.Wrapf(err, "failed to get package info")
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed to get pom file: %s", resp.Status)
+		return nil, errBuilder.Errorf("failed to get pom file: %s", resp.Status)
 	}
 
 	var pom POM
 	if err = xml.NewDecoder(resp.Body).Decode(&pom); err != nil {
-		return nil, fmt.Errorf("failed to decode response: %w", err)
+		return nil, errBuilder.Wrapf(err, "failed to decode response")
 	}
 	return &pom, nil
 }
@@ -160,5 +167,5 @@ func (c *Crawler) extractScrURL(pom *POM) (string, error) {
 		return pom.URL, nil
 	}
 
-	return "", fmt.Errorf("no repository URL found")
+	return "", oops.Errorf("no repository URL found")
 }
