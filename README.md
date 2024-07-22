@@ -7,6 +7,42 @@
 The crawler identifies source repositories from registered [PURLs (Package URLs)][purl] and copies VEX documents into VEX Hub.
 This process ensures that VEX Hub maintains an up-to-date collection of VEX documents for various software packages.
 
+The following diagram illustrates the high-level process flow of the VEX Hub Crawler, using npm as an example:
+
+```mermaid
+flowchart TD
+    Dev[Developer] -->|1. Register PURLs| PL
+    PL[PURL List] -->|2. Provide PURLs for crawling| Crawler
+    Crawler --> Registry[npm Registry]
+    Registry -->|3. Identify repository URL| Crawler
+    Crawler --> Src
+    Src -->|4. Retrieve VEX documents| Crawler
+    Crawler -->|5. Validate and copy VEX documents| Hub[VEX Hub]
+
+    subgraph Src [Source Repository]
+        Dir[.vex/ directory] -->|Store| Doc[VEX documents]
+    end
+
+    subgraph crawler [VEX Hub Crawler]
+        Crawler
+        PL
+    end
+
+    classDef dev fill:#e6f3ff,stroke:#333,stroke-width:1px;
+    classDef vexHub fill:#fff0f5,stroke:#333,stroke-width:1px;
+    classDef crawler fill:#e6ffe6,stroke:#333,stroke-width:1px;
+    classDef npmReg fill:#fff5e6,stroke:#333,stroke-width:1px;
+    classDef sourceRepo fill:#f0e6ff,stroke:#333,stroke-width:1px;
+    classDef purlList fill:#e6ffff,stroke:#333,stroke-width:1px;
+
+    class Dev dev;
+    class Hub vexHub;
+    class crawler crawler;
+    class Registry npmReg;
+    class Src,Dir,Doc sourceRepo;
+    class PL purlList;
+```
+
 ## Registering PURLs
 
 VEX Hub maintains [a list of PURLs](./crawler.yaml) for discovering VEX documents.
