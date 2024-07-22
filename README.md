@@ -14,7 +14,7 @@ flowchart TD
     Dev[Developer] -->|1. Register PURLs| PL
     PL[PURL List] -->|2. Provide PURLs for crawling| Crawler
     Crawler --> Registry[npm Registry]
-    Registry -->|3. Identify repository URL| Crawler
+    Registry -->|3. Identify source repository URL| Crawler
     Crawler --> Src
     Src -->|4. Retrieve VEX documents| Crawler
     Crawler -->|5. Validate and copy VEX documents| Hub[VEX Hub]
@@ -45,7 +45,7 @@ flowchart TD
 
 ## Registering PURLs
 
-VEX Hub maintains [a list of PURLs](./crawler.yaml) for discovering VEX documents.
+VEX Hub Crawler maintains [a list of PURLs](./crawler.yaml) for discovering VEX documents.
 The PURL definition file format is as follows:
 
 ```yaml
