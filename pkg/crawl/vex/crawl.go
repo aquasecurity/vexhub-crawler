@@ -119,7 +119,7 @@ func CrawlPackage(ctx context.Context, vexHubDir, url string, purl packageurl.Pa
 		Sources: sources,
 	}
 	if err = manifest.Write(filepath.Join(vexDir, manifest.FileName), m); err != nil {
-		return fmt.Errorf("failed to write sources: %w", err)
+		return oops.Wrapf(err, "failed to write sources")
 	}
 
 	return nil
@@ -174,7 +174,7 @@ func matchPath(path string) bool {
 func validateVEX(path, purl string) error {
 	v, err := vex.Open(path)
 	if err != nil {
-		return fmt.Errorf("failed to open VEX file: %w", err)
+		return oops.Wrapf(err, "failed to open VEX file")
 	} else if len(v.Statements) == 0 {
 		return errNoStatement
 	}
@@ -206,7 +206,7 @@ func fileSource(relPath, url string, permaLink *url.URL) *manifest.Source {
 // resetDir removes all files other than manifest.json in the directory and creates a new directory.
 func resetDir(dir string) error {
 	entries, err := os.ReadDir(dir)
-	if err != nil {
+	if err != nil && !os.IsNotExist(err) {
 		return oops.Wrapf(err, "failed to read the directory")
 	}
 	for _, entry := range entries {

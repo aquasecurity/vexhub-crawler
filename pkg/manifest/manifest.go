@@ -2,8 +2,9 @@ package manifest
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
+
+	"github.com/samber/oops"
 )
 
 const FileName = "manifest.json"
@@ -19,30 +20,32 @@ type Source struct {
 }
 
 func Write(filePath string, m Manifest) error {
+	errBuilder := oops.Code("write_manifest_error").In("manifest").With("filePath", filePath)
 	f, err := os.Create(filePath)
 	if err != nil {
-		return fmt.Errorf("failed to create sources file: %w", err)
+		return errBuilder.Wrapf(err, "failed to create sources file")
 	}
 	defer f.Close()
 
 	e := json.NewEncoder(f)
 	e.SetIndent("", "    ")
 	if err = e.Encode(m); err != nil {
-		return fmt.Errorf("JSON encode error: %w", err)
+		return errBuilder.Wrapf(err, "JSON encode error")
 	}
 	return nil
 }
 
 func Read(filePath string) (Manifest, error) {
+	errBuilder := oops.Code("read_manifest_error").In("manifest").With("filePath", filePath)
 	f, err := os.Open(filePath)
 	if err != nil {
-		return Manifest{}, fmt.Errorf("failed to open the file: %w", err)
+		return Manifest{}, errBuilder.Wrapf(err, "failed to open the file")
 	}
 	defer f.Close()
 
 	var m Manifest
 	if err = json.NewDecoder(f).Decode(&m); err != nil {
-		return Manifest{}, fmt.Errorf("failed to decode the file: %w", err)
+		return Manifest{}, errBuilder.Wrapf(err, "failed to decode the file")
 	}
 	return m, nil
 }

@@ -3,9 +3,10 @@ package cargo
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/samber/oops"
 
 	"github.com/aquasecurity/vexhub-crawler/pkg/config"
 	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
@@ -41,16 +42,18 @@ func NewCrawler(opts ...Option) *Crawler {
 	return crawler
 }
 func (c *Crawler) DetectSrc(ctx context.Context, pkg config.Package) (string, error) {
+	errBuilder := oops.Code("crawl_error").In("cargo").With("purl", pkg.PURL.String())
 	// Cargo doesn't use `namespace`
 	// cf. https://github.com/package-url/purl-spec/blob/master/PURL-TYPES.rst#cargo
 	rawurl, err := url.JoinPath(c.url, pkg.PURL.Name)
 	if err != nil {
-		return "", fmt.Errorf("failed to build url: %w", err)
+		return "", errBuilder.Wrapf(err, "failed to build url")
 	}
 
+	errBuilder = errBuilder.With("url", rawurl)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawurl, nil)
 	if err != nil {
-		return "", fmt.Errorf("failed to create request: %w", err)
+		return "", errBuilder.Wrapf(err, "failed to create request")
 	}
 
 	// Need to set a user-agent header
@@ -60,25 +63,25 @@ func (c *Crawler) DetectSrc(ctx context.Context, pkg config.Package) (string, er
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("failed to get package info: %w", err)
+		return "", errBuilder.Wrapf(err, "failed to get package info")
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("failed to get package info: %s", resp.Status)
+		return "", errBuilder.Errorf("failed to get package info: %s", resp.Status)
 	}
 
 	var r Response
 	if err = json.NewDecoder(resp.Body).Decode(&r); err != nil {
-		return "", fmt.Errorf("failed to decode response: %w", err)
+		return "", errBuilder.Wrapf(err, "failed to decode response")
 	}
 
 	if r.Crate.Repository == "" {
-		return "", fmt.Errorf("no repository URL found")
+		return "", errBuilder.Errorf("no repository URL found")
 	}
 
 	u, err := git.NormalizeURL(r.Crate.Repository)
 	if err != nil {
-		return "", fmt.Errorf("failed to normalize URL: %w", err)
+		return "", errBuilder.Wrapf(err, "failed to normalize URL")
 	}
 	return u.String(), nil
 }

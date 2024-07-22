@@ -1,17 +1,18 @@
 package git
 
 import (
-	"fmt"
 	"net/url"
 	"path"
 	"strings"
+
+	"github.com/samber/oops"
 )
 
 // NormalizeURL adjusts the given URL to a normalized form for hashicorp/go-getter.
 func NormalizeURL(rawurl string) (*url.URL, error) {
 	u, err := url.Parse(rawurl)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse URL: %w", err)
+		return nil, oops.Code("normalize_url_error").In("git").With("url", rawurl).Wrapf(err, "failed to parse URL")
 	}
 
 	// Force the git protocol

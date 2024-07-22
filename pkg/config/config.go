@@ -1,10 +1,10 @@
 package config
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/package-url/packageurl-go"
+	"github.com/samber/oops"
 	"gopkg.in/yaml.v3"
 )
 
@@ -34,20 +34,21 @@ type Config struct {
 }
 
 func Load(configPath string) (*Config, error) {
+	errBuilder := oops.Code("load_config_error").In("config").With("filePath", configPath)
 	f, err := os.Open(configPath)
 	if err != nil {
-		return nil, fmt.Errorf("file open error: %w", err)
+		return nil, errBuilder.Wrapf(err, "file open error")
 	}
 	defer f.Close()
 
 	var config configFile
 	if err = yaml.NewDecoder(f).Decode(&config); err != nil {
-		return nil, fmt.Errorf("failed to decode the file: %w", err)
+		return nil, errBuilder.Wrapf(err, "failed to decode the file")
 	}
 
 	pkgs, err := parsePackages(config.Packages)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse packages: %w", err)
+		return nil, errBuilder.Wrapf(err, "failed to parse packages")
 	}
 
 	return &Config{
@@ -60,7 +61,7 @@ func parsePackages(packages packages) ([]Package, error) {
 	for pkgType, pkgList := range packages {
 		for _, pkg := range pkgList {
 			if pkg.Name == "" {
-				return nil, fmt.Errorf("name is required")
+				return nil, oops.Errorf("name is required")
 			}
 
 			var qs packageurl.Qualifiers
