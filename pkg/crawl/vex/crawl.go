@@ -255,7 +255,7 @@ func hasVEXChanges(vexHubDir, vexDir string) (bool, error) {
 		// Check if the file is within vexDir
 		if strings.HasPrefix(filePath, relVexDir) {
 			// Exclude manifest.json
-			if filepath.Base(filePath) != manifest.FileName && fileStatus.Staging != git.Unmodified {
+			if filepath.Base(filePath) != manifest.FileName && fileStatus.Worktree != git.Unmodified {
 				return true, nil
 			}
 		}
