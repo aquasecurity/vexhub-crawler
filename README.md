@@ -13,8 +13,7 @@ The following diagram illustrates the high-level process flow of the VEX Hub Cra
 flowchart TD
     Dev[Developer] -->|1. Register Package| PL
     PL[Packages List] <--|2. Get packages for crawling| Crawler
-    Crawler --> Registry[npm Registry]
-    Registry -->|3. Identify source repository URL| Crawler
+    Crawler --> |3. Identify source repository URL| Registry[Package Registry]
     Crawler --> Src
     Src -->|4. Retrieve VEX documents| Crawler
     Crawler -->|5. Validate and copy VEX documents| Hub[VEX Hub]
