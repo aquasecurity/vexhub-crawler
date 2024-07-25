@@ -12,7 +12,7 @@ The following diagram illustrates the high-level process flow of the VEX Hub Cra
 ```mermaid
 flowchart TD
     Dev[Developer] -->|1. Register Package| PL
-    PL[PURL List] -->|2. Provide PURLs for crawling| Crawler
+    PL[Packages List] <--|2. Get packages for crawling| Crawler
     Crawler --> Registry[npm Registry]
     Registry -->|3. Identify source repository URL| Crawler
     Crawler --> Src
