@@ -11,34 +11,45 @@ The following diagram illustrates the high-level process flow of the VEX Hub Cra
 
 ```mermaid
 flowchart TD
-    Dev[Developer] -->|1. Register Package| PL
-    PL[Packages List] <--|2. Get packages for crawling| Crawler
-    Crawler --> |3. Identify source repository URL| Registry[Package Registry]
-    Crawler --> |4. Retrieve VEX documents|Src
-    Crawler -->|5. Validate and update VEX documents| Hub[VEX Hub]
-
-    subgraph Src [Source Repository]
-        Dir[.vex/ directory] -->|Store| Doc[VEX documents]
-    end
+    Dev[Developer] -->|1. Register Package| PL[Package List]
+    PL -->|2. Provide packages for crawling| Crawler
+    Crawler -->|3. Identify repository URL| Registry[Package Registry]
+    Crawler -->|4. Retrieve VEX documents| Src
+    Crawler -->|5. Validate and update VEX documents| Hub
 
     subgraph crawler [VEX Hub Crawler]
         Crawler
         PL
     end
 
-    classDef dev fill:#e6f3ff,stroke:#333,stroke-width:1px;
-    classDef vexHub fill:#fff0f5,stroke:#333,stroke-width:1px;
-    classDef crawler fill:#e6ffe6,stroke:#333,stroke-width:1px;
-    classDef npmReg fill:#fff5e6,stroke:#333,stroke-width:1px;
-    classDef sourceRepo fill:#f0e6ff,stroke:#333,stroke-width:1px;
-    classDef purlList fill:#e6ffff,stroke:#333,stroke-width:1px;
+    subgraph bottom [  ]
+        direction LR
+        Registry
+        Src
+        Hub[VEX Hub]
+        
+        subgraph Src[Source Repository]
+            direction TB
+            VEX[VEX documents\nunder .vex/ directory]
+        end
+    end
+
+    
+    classDef dev fill:#b3d9ff,stroke:#2a4d69,stroke-width:1px,color:#2a4d69;
+    classDef vexHub fill:#ffd9e6,stroke:#4b3832,stroke-width:1px,color:#4b3832;
+    classDef crawler fill:#c2f0c2,stroke:#1e4d2b,stroke-width:1px,color:#1e4d2b;
+    classDef npmReg fill:#ffe6cc,stroke:#5e3023,stroke-width:1px,color:#5e3023;
+    classDef sourceRepo fill:#e6ccff,stroke:#3b2e58,stroke-width:1px,color:#3b2e58;
+    classDef pkgList fill:#ccf2ff,stroke:#1c4e5a,stroke-width:1px,color:#1c4e5a;
+    classDef invisible fill:none,stroke:none;
 
     class Dev dev;
     class Hub vexHub;
     class crawler crawler;
     class Registry npmReg;
-    class Src,Dir,Doc sourceRepo;
-    class PL purlList;
+    class Src,VEX sourceRepo;
+    class PL pkgList;
+    class bottom invisible;
 ```
 
 ## Registering PURLs
