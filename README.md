@@ -14,8 +14,7 @@ flowchart TD
     Dev[Developer] -->|1. Register Package| PL
     PL[Packages List] <--|2. Get packages for crawling| Crawler
     Crawler --> |3. Identify source repository URL| Registry[Package Registry]
-    Crawler --> Src
-    Src -->|4. Retrieve VEX documents| Crawler
+    Crawler --> |4. Retrieve VEX documents|Src
     Crawler -->|5. Validate and copy VEX documents| Hub[VEX Hub]
 
     subgraph Src [Source Repository]
