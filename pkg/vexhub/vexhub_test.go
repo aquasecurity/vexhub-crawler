@@ -14,10 +14,10 @@ import (
 
 func TestGenerateIndex(t *testing.T) {
 	tests := []struct {
-		name          string
-		setup         func(root string) error
-		expectedError bool
-		expectedIndex string
+		name      string
+		setup     func(root string) error
+		wantErr   require.ErrorAssertionFunc
+		wantIndex string
 	}{
 		{
 			name: "successful index generation",
@@ -40,8 +40,8 @@ func TestGenerateIndex(t *testing.T) {
 				}
 				return os.WriteFile(manifestPath, data, 0644)
 			},
-			expectedError: false,
-			expectedIndex: `{
+			wantErr: require.NoError,
+			wantIndex: `{
 				"version": 1,
 				"packages": [
 					{ "id" : "package1", "location": "package1/source1" }
@@ -57,17 +57,13 @@ func TestGenerateIndex(t *testing.T) {
 			require.NoError(t, err)
 
 			err = vexhub.GenerateIndex(root)
-			if tt.expectedError {
-				require.Error(t, err)
-				return
-			}
-			require.NoError(t, err)
+			tt.wantErr(t, err)
 
 			indexPath := filepath.Join(root, "index.json")
 			data, err := os.ReadFile(indexPath)
 			require.NoError(t, err)
 
-			require.JSONEq(t, string(tt.expectedIndex), string(data))
+			require.JSONEq(t, tt.wantIndex, string(data))
 		})
 	}
 }
