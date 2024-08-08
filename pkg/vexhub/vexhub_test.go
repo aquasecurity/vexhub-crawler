@@ -6,9 +6,10 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/aquasecurity/vexhub-crawler/pkg/manifest"
 	"github.com/aquasecurity/vexhub-crawler/pkg/vexhub"
-	"github.com/stretchr/testify/require"
 )
 
 func TestGenerateIndex(t *testing.T) {
@@ -51,11 +52,8 @@ func TestGenerateIndex(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			root, err := os.MkdirTemp("", "vexhub_test")
-			require.NoError(t, err)
-			defer os.RemoveAll(root)
-
-			err = tt.setup(root)
+			root := t.TempDir()
+			err := tt.setup(root)
 			require.NoError(t, err)
 
 			err = vexhub.GenerateIndex(root)
