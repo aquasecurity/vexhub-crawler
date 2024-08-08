@@ -6,6 +6,6 @@ type Index struct {
 }
 
 type Package struct {
-	ID       string // Must be PURL at the moment
-	Location string // File path to the VEX document
+	ID       string `json:"id"`       // Must be PURL at the moment
+	Location string `json:"location"` // File path to the VEX document
 }
