@@ -1,14 +1,14 @@
-package git_test
+package url_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
+	"github.com/aquasecurity/vexhub-crawler/pkg/url"
 )
 
-func TestNormalizeURL(t *testing.T) {
+func TestURL_GetterString(t *testing.T) {
 	tests := []struct {
 		name    string
 		rawURL  string
@@ -23,7 +23,7 @@ func TestNormalizeURL(t *testing.T) {
 		{
 			name:   "happy path - GitHub URL with tree",
 			rawURL: "https://github.com/user/repo/tree/main/subfolder",
-			want:   "git::https://github.com/user/repo.git//subfolder?depth=1&ref=main",
+			want:   "git::https://github.com/user/repo.git?depth=1&ref=main",
 		},
 		{
 			name:   "happy path - GitLab URL",
@@ -44,14 +44,14 @@ func TestNormalizeURL(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := git.NormalizeURL(tt.rawURL)
+			u, err := url.Parse(tt.rawURL)
 			if tt.wantErr != "" {
 				require.ErrorContains(t, err, tt.wantErr)
 				return
 			}
 
 			require.NoError(t, err)
-			require.Equal(t, tt.want, got.String())
+			require.Equal(t, tt.want, u.GetterString())
 		})
 	}
 }
