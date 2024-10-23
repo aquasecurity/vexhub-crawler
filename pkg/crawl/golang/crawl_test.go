@@ -35,7 +35,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 			mockServer: func(w http.ResponseWriter, r *http.Request) {
 				assert.Fail(t, "unexpected HTTP call")
 			},
-			want:    "git::https://github.com/example/repo.git?depth=1",
+			want:    "https://github.com/example/repo",
 			wantErr: false,
 		},
 		{
@@ -65,7 +65,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 				</head></html>`, r.Host)))
 				assert.NoError(t, err)
 			},
-			want:    "git::https://github.com/org/repo.git?depth=1",
+			want:    "https://github.com/org/repo.git",
 			wantErr: false,
 		},
 	}
@@ -89,7 +89,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 				return
 			}
 			require.NoError(t, err)
-			assert.Equal(t, tt.want, got)
+			assert.Equal(t, tt.want, got.String())
 		})
 	}
 }

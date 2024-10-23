@@ -34,7 +34,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 					Version: "sha256:53e6715d5c67e80e629f0dfa3bd6ed2bc74bdcaa4bdbe934a5a1811a249db6b9",
 				},
 			},
-			want: "git::https://github.com/aquasecurity/trivy.git?depth=1",
+			want: "https://github.com/aquasecurity/trivy",
 		},
 		{
 			name: "happy path url from manifest",
@@ -46,7 +46,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 					Version: "sha256:53e6715d5c67e80e629f0dfa3bd6ed2bc74bdcaa4bdbe934a5a1811a249db6b9",
 				},
 			},
-			want: "git::https://github.com/aquasecurity/trivy.git?depth=1",
+			want: "https://github.com/aquasecurity/trivy",
 		},
 		{
 			name: "happy path with tag",
@@ -64,7 +64,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 					},
 				},
 			},
-			want: "git::https://github.com/aquasecurity/trivy.git?depth=1",
+			want: "https://github.com/aquasecurity/trivy",
 		},
 		{
 			name: "sad path - url no found",
@@ -156,7 +156,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 			}
 
 			require.NoError(t, err)
-			require.Equal(t, tt.want, got)
+			require.Equal(t, tt.want, got.String())
 		})
 	}
 }

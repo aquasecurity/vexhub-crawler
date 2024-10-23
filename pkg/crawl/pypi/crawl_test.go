@@ -28,7 +28,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 					Name: "flask",
 				},
 			},
-			want: "git::https://github.com/pallets/flask/.git?depth=1",
+			want: "https://github.com/pallets/flask/",
 		},
 		{
 			name: "sad path when response file doesn't contain source url",
@@ -76,7 +76,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 			}
 
 			require.NoError(t, err)
-			require.Equal(t, tt.want, got)
+			require.Equal(t, tt.want, got.String())
 		})
 	}
 }

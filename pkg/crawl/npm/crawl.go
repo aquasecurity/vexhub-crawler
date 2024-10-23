@@ -9,7 +9,7 @@ import (
 	"github.com/samber/oops"
 
 	"github.com/aquasecurity/vexhub-crawler/pkg/config"
-	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
+	xurl "github.com/aquasecurity/vexhub-crawler/pkg/url"
 )
 
 const npmAPI = "https://registry.npmjs.org/"
@@ -42,36 +42,36 @@ func NewCrawler(opts ...Option) *Crawler {
 	return crawler
 }
 
-func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, error) {
+func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (*xurl.URL, error) {
 	errBuilder := oops.Code("crawl_error").In("npm").With("purl", pkg.PURL.String())
 
 	npmURL, err := url.JoinPath(c.url, pkg.PURL.Namespace, pkg.PURL.Name)
 	if err != nil {
-		return "", errBuilder.Wrapf(err, "failed to build package url")
+		return nil, errBuilder.Wrapf(err, "failed to build package url")
 	}
 
 	errBuilder = errBuilder.With("url", npmURL)
 	resp, err := http.Get(npmURL)
 	if err != nil {
-		return "", errBuilder.Wrapf(err, "failed to get package info")
+		return nil, errBuilder.Wrapf(err, "failed to get package info")
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return "", errBuilder.Errorf("failed to get package info: %s", resp.Status)
+		return nil, errBuilder.Errorf("failed to get package info: %s", resp.Status)
 	}
 
 	var r Response
 	if err = json.NewDecoder(resp.Body).Decode(&r); err != nil {
-		return "", errBuilder.Wrapf(err, "failed to decode response")
+		return nil, errBuilder.Wrapf(err, "failed to decode response")
 	}
 
 	if r.Repository.URL == "" {
-		return "", errBuilder.Errorf("no repository URL found")
+		return nil, errBuilder.Errorf("no repository URL found")
 	}
 
-	u, err := git.NormalizeURL(r.Repository.URL)
+	u, err := xurl.Parse(r.Repository.URL)
 	if err != nil {
-		return "", errBuilder.Wrapf(err, "failed to normalize URL")
+		return nil, errBuilder.Wrapf(err, "failed to normalize URL")
 	}
-	return u.String(), nil
+	return u, nil
 }
