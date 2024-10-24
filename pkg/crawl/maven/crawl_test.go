@@ -33,7 +33,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 					Name:      "jackson-core",
 				},
 			},
-			want: "git::https://github.com/FasterXML/jackson-core.git?depth=1",
+			want: "https://github.com/FasterXML/jackson-core",
 		},
 		{
 			name:    "happy path with url from `scm.url` field",
@@ -46,7 +46,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 					Name:      "jackson-core",
 				},
 			},
-			want: "git::https://github.com/FasterXML/jackson-core.git?depth=1",
+			want: "https://github.com/FasterXML/jackson-core",
 		},
 		{
 			name:    "happy path with repo from purl",
@@ -65,7 +65,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 					},
 				},
 			},
-			want: "git::https://github.com/FasterXML/jackson-core.git?depth=1",
+			want: "https://github.com/FasterXML/jackson-core",
 		},
 		{
 			name:    "happy path with ArtifactID which contains dot",
@@ -78,7 +78,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 					Name:      "catboost-spark-aggregate_2.11",
 				},
 			},
-			want: "git::https://github.com/catboost/catboost.git?depth=1",
+			want: "https://github.com/catboost/catboost",
 		},
 		{
 			name:    "sad path when maven-metadata.xml doesn't exist",
@@ -186,7 +186,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 				}
 
 				require.NoError(t, err)
-				require.Equal(t, tt.want, got)
+				require.Equal(t, tt.want, got.String())
 			},
 		)
 	}

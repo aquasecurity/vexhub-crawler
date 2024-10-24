@@ -6,14 +6,13 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"net/url"
 	"path"
 	"strings"
 
 	"github.com/samber/oops"
 
 	"github.com/aquasecurity/vexhub-crawler/pkg/config"
-	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
+	"github.com/aquasecurity/vexhub-crawler/pkg/url"
 )
 
 const mavenRepo = "https://repo.maven.apache.org/maven2"
@@ -63,7 +62,7 @@ func NewCrawler(opts ...Option) *Crawler {
 // DetectSrc detects the source repository URL of the package.
 // It fetches the latest version and POM file to extract the repository URL
 // as we didn't find a way to get the repository URL directly from the metadata.
-func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, error) {
+func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (*url.URL, error) {
 	errBuilder := oops.Code("crawl_error").In("maven").With("purl", pkg.PURL.String())
 
 	purl := pkg.PURL
@@ -75,7 +74,7 @@ func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, erro
 
 	baseURL, err := url.Parse(repoURL)
 	if err != nil {
-		return "", errBuilder.Wrapf(err, "failed to parse repository URL")
+		return nil, errBuilder.Wrapf(err, "failed to parse repository URL")
 	}
 
 	// GroupID (purl.Name) can contain `.`.
@@ -85,7 +84,7 @@ func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, erro
 
 	latest, err := c.fetchLatestVersion(baseURL)
 	if err != nil {
-		return "", errBuilder.Wrapf(err, "failed to fetch the latest version")
+		return nil, errBuilder.Wrapf(err, "failed to fetch the latest version")
 	}
 	slog.Info(
 		"Latest version found",
@@ -94,24 +93,24 @@ func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, erro
 
 	pom, err := c.fetchPOM(baseURL, purl.Name, latest)
 	if err != nil {
-		return "", errBuilder.Wrapf(err, "failed to fetch POM")
+		return nil, errBuilder.Wrapf(err, "failed to fetch POM")
 	}
 
 	srcURL, err := c.extractScrURL(pom)
 	if err != nil {
-		return "", errBuilder.Wrapf(err, "failed to extract repository URL")
+		return nil, errBuilder.Wrapf(err, "failed to extract repository URL")
 	}
 
-	u, err := git.NormalizeURL(srcURL)
+	u, err := url.Parse(srcURL)
 	if err != nil {
-		return "", errBuilder.Wrapf(err, "failed to normalize URL")
+		return nil, errBuilder.Wrapf(err, "failed to normalize URL")
 	}
 
-	return u.String(), nil
+	return u, nil
 }
 
 func (c *Crawler) fetchLatestVersion(baseURL *url.URL) (string, error) {
-	metaURL := *baseURL
+	metaURL := *baseURL.URL
 	metaURL.Path = path.Join(metaURL.Path, "maven-metadata.xml")
 
 	errBuilder := oops.Code("fetch_latest_version_error").With("metadata url", metaURL.String())
@@ -138,7 +137,7 @@ func (c *Crawler) fetchLatestVersion(baseURL *url.URL) (string, error) {
 }
 
 func (c *Crawler) fetchPOM(baseURL *url.URL, name, latest string) (*POM, error) {
-	pomURL := *baseURL
+	pomURL := *baseURL.URL
 	pomURL.Path = path.Join(pomURL.Path, latest, fmt.Sprintf("%s-%s.pom", name, latest))
 
 	errBuilder := oops.Code("fetch_pom_error").With("pom url", pomURL.String())

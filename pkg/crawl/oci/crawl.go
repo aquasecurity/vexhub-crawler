@@ -10,7 +10,7 @@ import (
 	"github.com/samber/oops"
 
 	"github.com/aquasecurity/vexhub-crawler/pkg/config"
-	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
+	"github.com/aquasecurity/vexhub-crawler/pkg/url"
 )
 
 const imageSourceAnnotation = "org.opencontainers.image.source"
@@ -21,12 +21,12 @@ func NewCrawler() *Crawler {
 	return &Crawler{}
 }
 
-func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, error) {
+func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (*url.URL, error) {
 	errBuilder := oops.Code("crawl_error").In("oci").With("purl", pkg.PURL.String())
 	qs := pkg.PURL.Qualifiers.Map()
 	repositoryURL, ok := qs["repository_url"]
 	if !ok {
-		return "", oops.Errorf("repository_url not found")
+		return nil, oops.Errorf("repository_url not found")
 	}
 	tag, ok := qs["tag"]
 	if !ok {
@@ -37,25 +37,25 @@ func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (string, erro
 	errBuilder = errBuilder.With("ref", refStr)
 	ref, err := name.ParseReference(refStr)
 	if err != nil {
-		return "", errBuilder.Wrapf(err, "parsing reference")
+		return nil, errBuilder.Wrapf(err, "parsing reference")
 	}
 
 	img, err := remote.Image(ref)
 	if err != nil {
-		return "", errBuilder.Wrapf(err, "reading image")
+		return nil, errBuilder.Wrapf(err, "reading image")
 	}
 
 	src, err := c.findImageSource(img)
 	if err != nil {
-		return "", errBuilder.Wrapf(err, "finding image source")
+		return nil, errBuilder.Wrapf(err, "finding image source")
 	}
 
-	u, err := git.NormalizeURL(src)
+	u, err := url.Parse(src)
 	if err != nil {
-		return "", errBuilder.With("url", src).Wrapf(err, "normalizing URL")
+		return nil, errBuilder.With("url", src).Wrapf(err, "normalizing URL")
 	}
 
-	return u.String(), nil
+	return u, nil
 }
 
 func (c *Crawler) findImageSource(img v1.Image) (string, error) {

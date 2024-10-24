@@ -18,11 +18,12 @@ import (
 
 func TestCrawler_DetectSrc(t *testing.T) {
 	tests := []struct {
-		name       string
-		pkg        config.Package
-		mockServer func(w http.ResponseWriter, r *http.Request)
-		want       string
-		wantErr    bool
+		name        string
+		pkg         config.Package
+		mockServer  func(w http.ResponseWriter, r *http.Request)
+		want        string
+		wantSubDirs string
+		wantErr     bool
 	}{
 		{
 			name: "GitHub repository",
@@ -35,8 +36,24 @@ func TestCrawler_DetectSrc(t *testing.T) {
 			mockServer: func(w http.ResponseWriter, r *http.Request) {
 				assert.Fail(t, "unexpected HTTP call")
 			},
-			want:    "git::https://github.com/example/repo.git?depth=1",
+			want:    "https://github.com/example/repo",
 			wantErr: false,
+		},
+		{
+			name: "GitHub repository with subdirs",
+			pkg: config.Package{
+				PURL: packageurl.PackageURL{
+					Type:    "golang",
+					Name:    "github.com/example/repo",
+					Subpath: "foo/bar",
+				},
+			},
+			mockServer: func(w http.ResponseWriter, r *http.Request) {
+				assert.Fail(t, "unexpected HTTP call")
+			},
+			want:        "https://github.com/example/repo",
+			wantSubDirs: "foo/bar",
+			wantErr:     false,
 		},
 		{
 			name: "failure - invalid import path",
@@ -65,7 +82,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 				</head></html>`, r.Host)))
 				assert.NoError(t, err)
 			},
-			want:    "git::https://github.com/org/repo.git?depth=1",
+			want:    "https://github.com/org/repo.git",
 			wantErr: false,
 		},
 	}
@@ -89,7 +106,8 @@ func TestCrawler_DetectSrc(t *testing.T) {
 				return
 			}
 			require.NoError(t, err)
-			assert.Equal(t, tt.want, got)
+			assert.Equal(t, tt.want, got.String())
+			assert.Equal(t, tt.wantSubDirs, got.Subdirs())
 		})
 	}
 }

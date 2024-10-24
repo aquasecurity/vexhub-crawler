@@ -9,7 +9,7 @@ import (
 	"github.com/samber/oops"
 
 	"github.com/aquasecurity/vexhub-crawler/pkg/config"
-	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/git"
+	xurl "github.com/aquasecurity/vexhub-crawler/pkg/url"
 )
 
 const cratesAPI = "https://crates.io/api/v1/crates/"
@@ -41,19 +41,20 @@ func NewCrawler(opts ...Option) *Crawler {
 	}
 	return crawler
 }
-func (c *Crawler) DetectSrc(ctx context.Context, pkg config.Package) (string, error) {
+
+func (c *Crawler) DetectSrc(ctx context.Context, pkg config.Package) (*xurl.URL, error) {
 	errBuilder := oops.Code("crawl_error").In("cargo").With("purl", pkg.PURL.String())
 	// Cargo doesn't use `namespace`
 	// cf. https://github.com/package-url/purl-spec/blob/master/PURL-TYPES.rst#cargo
 	rawurl, err := url.JoinPath(c.url, pkg.PURL.Name)
 	if err != nil {
-		return "", errBuilder.Wrapf(err, "failed to build url")
+		return nil, errBuilder.Wrapf(err, "failed to build url")
 	}
 
 	errBuilder = errBuilder.With("url", rawurl)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawurl, nil)
 	if err != nil {
-		return "", errBuilder.Wrapf(err, "failed to create request")
+		return nil, errBuilder.Wrapf(err, "failed to create request")
 	}
 
 	// Need to set a user-agent header
@@ -63,25 +64,25 @@ func (c *Crawler) DetectSrc(ctx context.Context, pkg config.Package) (string, er
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", errBuilder.Wrapf(err, "failed to get package info")
+		return nil, errBuilder.Wrapf(err, "failed to get package info")
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return "", errBuilder.Errorf("failed to get package info: %s", resp.Status)
+		return nil, errBuilder.Errorf("failed to get package info: %s", resp.Status)
 	}
 
 	var r Response
 	if err = json.NewDecoder(resp.Body).Decode(&r); err != nil {
-		return "", errBuilder.Wrapf(err, "failed to decode response")
+		return nil, errBuilder.Wrapf(err, "failed to decode response")
 	}
 
 	if r.Crate.Repository == "" {
-		return "", errBuilder.Errorf("no repository URL found")
+		return nil, errBuilder.Errorf("no repository URL found")
 	}
 
-	u, err := git.NormalizeURL(r.Crate.Repository)
+	u, err := xurl.Parse(r.Crate.Repository)
 	if err != nil {
-		return "", errBuilder.Wrapf(err, "failed to normalize URL")
+		return nil, errBuilder.Wrapf(err, "failed to normalize URL")
 	}
-	return u.String(), nil
+	return u, nil
 }
