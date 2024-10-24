@@ -5,6 +5,9 @@ pkg:
     - namespace: github.com/k3s-io
       name: k3s
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/k3s-io/k3s
+    - namespace: github.com/longhorn
+      name: longhorn-share-manager
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/longhorn/longhorn-share-manager
     - namespace: github.com/rancher
       name: confd
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/confd
