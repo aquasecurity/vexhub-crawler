@@ -10,10 +10,11 @@ import (
 
 func TestURL_GetterString(t *testing.T) {
 	tests := []struct {
-		name    string
-		rawURL  string
-		want    string
-		wantErr string
+		name        string
+		rawURL      string
+		want        string
+		wantSubDirs string
+		wantErr     string
 	}{
 		{
 			name:   "happy path - GitHub URL",
@@ -21,9 +22,16 @@ func TestURL_GetterString(t *testing.T) {
 			want:   "git::https://github.com/user/repo.git?depth=1",
 		},
 		{
-			name:   "happy path - GitHub URL with tree",
-			rawURL: "https://github.com/user/repo/tree/main/subfolder",
-			want:   "git::https://github.com/user/repo.git?depth=1&ref=main",
+			name:        "happy path - GitHub URL with tree",
+			rawURL:      "https://github.com/user/repo/tree/main/subfolder/subfolder2",
+			want:        "git::https://github.com/user/repo.git?depth=1&ref=main",
+			wantSubDirs: "subfolder/subfolder2",
+		},
+		{
+			name:        "happy path - GitHub URL with subdirs",
+			rawURL:      "https://github.com/hashicorp/go-getter.git//testdata",
+			want:        "git::https://github.com/hashicorp/go-getter.git",
+			wantSubDirs: "testdata",
 		},
 		{
 			name:   "happy path - GitLab URL",
@@ -52,6 +60,7 @@ func TestURL_GetterString(t *testing.T) {
 
 			require.NoError(t, err)
 			require.Equal(t, tt.want, u.GetterString())
+			require.Equal(t, tt.wantSubDirs, u.Subdirs())
 		})
 	}
 }
