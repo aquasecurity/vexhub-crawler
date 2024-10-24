@@ -30,7 +30,7 @@ func TestURL_GetterString(t *testing.T) {
 		{
 			name:        "happy path - GitHub URL with subdirs",
 			rawURL:      "https://github.com/hashicorp/go-getter.git//testdata",
-			want:        "git::https://github.com/hashicorp/go-getter.git",
+			want:        "git::https://github.com/hashicorp/go-getter.git?depth=1",
 			wantSubDirs: "testdata",
 		},
 		{

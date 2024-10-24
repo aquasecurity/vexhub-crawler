@@ -38,6 +38,12 @@ func Parse(rawurl string) (*URL, error) {
 	if u.Host == "gitlab.com" {
 	}
 
+	// Parse subdirectories: go-getter specific
+	if before, after, found := strings.Cut(u.Path, "//"); found {
+		u.Path = before
+		u.subdirs = after
+	}
+
 	return u, nil
 }
 
