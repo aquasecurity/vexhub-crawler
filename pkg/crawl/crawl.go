@@ -15,6 +15,7 @@ import (
 	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/oci"
 	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/pypi"
 	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/vex"
+	"github.com/aquasecurity/vexhub-crawler/pkg/url"
 )
 
 type Options struct {
@@ -24,7 +25,7 @@ type Options struct {
 }
 
 type Crawler interface {
-	DetectSrc(context.Context, config.Package) (string, error)
+	DetectSrc(context.Context, config.Package) (*url.URL, error)
 }
 
 func Packages(ctx context.Context, opts Options) error {
@@ -62,16 +63,19 @@ func crawlPackage(ctx context.Context, vexHubDir string, pkg config.Package) err
 		return oops.Errorf("unsupported package type: %s", pkg.PURL.Type)
 	}
 
-	src := pkg.URL
-	if src == "" {
-		detected, err := crawler.DetectSrc(ctx, pkg)
-		if err != nil {
+	var src *url.URL
+	var err error
+	if pkg.URL != "" {
+		if src, err = url.Parse(pkg.URL); err != nil {
+			return errBuilder.With("url", pkg.URL).Wrapf(err, "failed to normalize URL")
+		}
+	} else {
+		if src, err = crawler.DetectSrc(ctx, pkg); err != nil {
 			return errBuilder.Wrapf(err, "failed to detect source repository")
 		}
-		src = detected
 	}
 
-	if err := vex.CrawlPackage(ctx, vexHubDir, src, pkg.PURL); err != nil {
+	if err = vex.CrawlPackage(ctx, vexHubDir, src, pkg.PURL); err != nil {
 		return errBuilder.Wrapf(err, "failed to crawl package")
 	}
 	return nil

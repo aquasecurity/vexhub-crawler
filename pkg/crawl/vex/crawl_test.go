@@ -19,6 +19,7 @@ import (
 
 	"github.com/aquasecurity/vexhub-crawler/pkg/crawl/vex"
 	"github.com/aquasecurity/vexhub-crawler/pkg/manifest"
+	"github.com/aquasecurity/vexhub-crawler/pkg/url"
 )
 
 var signature = &object.Signature{
@@ -222,7 +223,10 @@ func TestCrawlPackage(t *testing.T) {
 			purl, err := packageurl.FromString(tt.purl)
 			require.NoError(t, err)
 
-			err = vex.CrawlPackage(context.Background(), vexHubDir, "git::"+server.URL+"/testrepo.git", purl)
+			u, err := url.Parse(server.URL + "/testrepo.git")
+			require.NoError(t, err)
+
+			err = vex.CrawlPackage(context.Background(), vexHubDir, u, purl)
 			if tt.wantErr != "" {
 				assert.ErrorContains(t, err, tt.wantErr)
 				return

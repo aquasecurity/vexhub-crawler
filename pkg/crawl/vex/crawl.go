@@ -19,6 +19,7 @@ import (
 
 	"github.com/aquasecurity/vexhub-crawler/pkg/download"
 	"github.com/aquasecurity/vexhub-crawler/pkg/manifest"
+	xurl "github.com/aquasecurity/vexhub-crawler/pkg/url"
 )
 
 var (
@@ -26,7 +27,7 @@ var (
 	errNoStatement  = fmt.Errorf("no statements found")
 )
 
-func CrawlPackage(ctx context.Context, vexHubDir, url string, purl packageurl.PackageURL) error {
+func CrawlPackage(ctx context.Context, vexHubDir string, url *xurl.URL, purl packageurl.PackageURL) error {
 	errBuilder := oops.In("crawl").With("purl", purl.String()).With("url", url)
 	tmpDir, err := os.MkdirTemp("", "vexhub-crawler-*")
 	if err != nil {
@@ -35,7 +36,7 @@ func CrawlPackage(ctx context.Context, vexHubDir, url string, purl packageurl.Pa
 	defer os.RemoveAll(tmpDir)
 
 	dst := filepath.Join(tmpDir, purl.Name)
-	if err = download.Download(ctx, url, dst); err != nil {
+	if err = download.Download(ctx, url.GetterString(), dst); err != nil {
 		return errBuilder.Wrapf(err, "download error")
 	}
 
@@ -60,7 +61,11 @@ func CrawlPackage(ctx context.Context, vexHubDir, url string, purl packageurl.Pa
 	var found bool
 	var sources []manifest.Source
 	logger := slog.With(slog.String("purl", purl.String()), "url", url)
-	root := filepath.Join(dst, ".vex")
+
+	root := filepath.Join(dst, url.Subdirs())
+	if _, err := os.Stat(filepath.Join(root, ".vex")); err == nil {
+		root = filepath.Join(root, ".vex") // If the directory contains a .vex directory, use it as the root
+	}
 	err = filepath.WalkDir(root, func(filePath string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return errBuilder.Wrapf(err, "failed to walk the directory")
@@ -188,12 +193,10 @@ func validateVEX(path, purl string) error {
 	return errPURLMismatch
 }
 
-func fileSource(relPath, url string, permaLink *url.URL) *manifest.Source {
-	url = strings.TrimPrefix(url, "git::")
-	url = strings.TrimSuffix(url, "?depth=1")
+func fileSource(relPath string, url *xurl.URL, permaLink *url.URL) *manifest.Source {
 	source := manifest.Source{
 		Path: filepath.Base(relPath),
-		URL:  url,
+		URL:  url.String(),
 	}
 	if permaLink != nil {
 		l := *permaLink

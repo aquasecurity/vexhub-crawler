@@ -30,7 +30,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 					Name: "typemap",
 				},
 			},
-			want: "git::https://github.com/reem/rust-typemap.git?depth=1",
+			want: "https://github.com/reem/rust-typemap",
 		},
 		{
 			name: "sad path with empty `repository` field",
@@ -88,7 +88,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 				}
 
 				require.NoError(t, err)
-				require.Equal(t, tt.want, got)
+				require.Equal(t, tt.want, got.String())
 			},
 		)
 	}

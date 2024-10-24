@@ -28,7 +28,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 					Name: "debug",
 				},
 			},
-			want: "git::https://github.com/debug-js/debug.git?depth=1",
+			want: "git://github.com/debug-js/debug.git",
 		},
 		{
 			name: "happy path with package with namespace",
@@ -39,7 +39,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 					Name:      "parser",
 				},
 			},
-			want: "git::https://github.com/babel/babel.git?depth=1",
+			want: "https://github.com/babel/babel.git",
 		},
 		{
 			name: "sad path with empty repo",
@@ -77,7 +77,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 			}
 
 			require.NoError(t, err)
-			require.Equal(t, tt.want, got)
+			require.Equal(t, tt.want, got.String())
 		})
 	}
 }
