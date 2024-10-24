@@ -2,6 +2,39 @@ pkg:
   golang:
     - namespace: github.com/aquasecurity
       name: trivy
+    - namespace: github.com/rancher
+      name: confd
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/confd
+    - namespace: github.com/rancher
+      name: fleet
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/fleet
+    - namespace: github.com/rancher
+      name: image-build-rke2-cloud-provider
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/image-build-rke2-cloud-provider
+    - namespace: github.com/rancher
+      name: kube-api-auth
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/kube-api-auth
+    - namespace: github.com/rancher
+      name: machine
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/machine
+    - namespace: github.com/rancher
+      name: rancher
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/rancher
+    - namespace: github.com/rancher
+      name: rke2
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/rke2
+    - namespace: github.com/rancher
+      name: support-bundle-kit
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/support-bundle-kit
+    - namespace: github.com/rancher
+      name: system-agent
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/system-agent
+    - namespace: github.com/rancher
+      name: webhook
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/webhook
+    - namespace: github.com/rancher
+      name: wharfie
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/wharfie
   oci:
     - name: trivy
       qualifiers:
