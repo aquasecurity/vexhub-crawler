@@ -38,7 +38,7 @@ func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (*url.URL, er
 	subPath := strings.TrimPrefix(importPath, repoRoot.Root)
 	if subPath != "" {
 		// cf. https://github.com/hashicorp/go-getter?tab=readme-ov-file#subdirectories
-		u.SetSubdirs(subPath)
+		u.SetSubdirs(strings.TrimPrefix(subPath, "/"))
 	}
 	return u, nil
 }

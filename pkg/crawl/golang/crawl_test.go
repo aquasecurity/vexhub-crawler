@@ -52,7 +52,7 @@ func TestCrawler_DetectSrc(t *testing.T) {
 				assert.Fail(t, "unexpected HTTP call")
 			},
 			want:        "https://github.com/example/repo",
-			wantSubDirs: "/foo/bar",
+			wantSubDirs: "foo/bar",
 			wantErr:     false,
 		},
 		{
