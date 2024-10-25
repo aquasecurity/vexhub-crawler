@@ -2,6 +2,39 @@ pkg:
   golang:
     - namespace: github.com/aquasecurity
       name: trivy
+    - namespace: github.com/harvester
+      name: docker-machine-driver-harvester
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/docker-machine-driver-harvester
+    - namespace: github.com/harvester
+      name: harvester
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/harvester
+    - namespace: github.com/harvester
+      name: harvester-cloud-provider
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/harvester-cloud-provider
+    - namespace: github.com/harvester
+      name: harvester-installer
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/harvester-installer
+    - namespace: github.com/harvester
+      name: harvester-load-balancer
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/harvester-load-balancer
+    - namespace: github.com/harvester
+      name: harvester-network-controller
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/harvester-network-controller
+    - namespace: github.com/harvester
+      name: node-manager
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/node-manager
+    - namespace: github.com/harvester
+      name: pcidevices
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/pcidevices
+    - namespace: github.com/harvester
+      name: seeder
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/seeder
+    - namespace: github.com/harvester
+      name: vm-import-controller
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/vm-import-controller
+    - namespace: github.com/harvester
+      name: webhook
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/webhook
     - namespace: github.com/k3s-io
       name: k3s
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/k3s-io/k3s
