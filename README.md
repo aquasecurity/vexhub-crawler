@@ -11,11 +11,11 @@ The following diagram illustrates the high-level process flow of the VEX Hub Cra
 
 ```mermaid
 flowchart TD
-    Dev[Developer] -->|1. Register Package| PL[Package List]
-    PL -->|2. Provide packages for crawling| Crawler
-    Crawler -->|3. Identify repository URL| Registry[Package Registry]
-    Crawler -->|4. Retrieve VEX documents| Src
-    Crawler -->|5. Validate and update VEX documents| Hub
+    Dev[Developer] -->|Register package| PL[Package List]
+    PL -->|Provide packages for crawling| Crawler
+    Crawler -->|Identify repository URL| Registry[Package Registry]
+    Crawler -->|Retrieve VEX documents| Src
+    Crawler -->|Validate and update VEX documents| Hub
 
     subgraph crawler [VEX Hub Crawler]
         Crawler
@@ -30,7 +30,7 @@ flowchart TD
         
         subgraph Src[Source Repository]
             direction TB
-            VEX[VEX documents\nunder .vex/ directory]
+            VEX[VEX documents<br>under .vex/ directory]
         end
     end
 
