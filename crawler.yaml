@@ -6,11 +6,11 @@ pkg:
       name: docker-machine-driver-harvester
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/docker-machine-driver-harvester
     - namespace: github.com/harvester
-      name: harvester
-      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/harvester
-    - namespace: github.com/harvester
       name: harvester-cloud-provider
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/harvester-cloud-provider
+    - namespace: github.com/harvester
+      name: harvester-csi-driver
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/harvester-csi-driver
     - namespace: github.com/harvester
       name: harvester-installer
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/harvester-installer
@@ -20,6 +20,15 @@ pkg:
     - namespace: github.com/harvester
       name: harvester-network-controller
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/harvester-network-controller
+    - namespace: github.com/harvester
+      name: harvester
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/harvester
+    - namespace: github.com/harvester
+      name: networkfs-manager
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/networkfs-manager
+    - namespace: github.com/harvester
+      name: node-disk-manager
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/node-disk-manager
     - namespace: github.com/harvester
       name: node-manager
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/node-manager
@@ -36,17 +45,71 @@ pkg:
       name: webhook
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/webhook
     - namespace: github.com/k3s-io
+      name: helm-set-status
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/k3s-io/helm-set-status
+    - namespace: github.com/k3s-io
       name: k3s
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/k3s-io/k3s
+    - namespace: github.com/k3s-io
+      name: kine
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/k3s-io/kine
+    - namespace: github.com/longhorn
+      name: backing-image-manager
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/longhorn/backing-image-manager
+    - namespace: github.com/longhorn
+      name: cli
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/longhorn/cli
+    - namespace: github.com/longhorn
+      name: longhorn-engine
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/longhorn/longhorn-engine
+    - namespace: github.com/longhorn
+      name: longhorn-instance-manager
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/longhorn/longhorn-instance-manager
+    - namespace: github.com/longhorn
+      name: longhorn-manager
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/longhorn/longhorn-manager
     - namespace: github.com/longhorn
       name: longhorn-share-manager
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/longhorn/longhorn-share-manager
     - namespace: github.com/rancher
+      name: aks-operator
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/aks-operator
+    - namespace: github.com/rancher
+      name: backup-restore-operator
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/backup-restore-operator
+    - namespace: github.com/rancher/backup-restore-operator
+      name: tests
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/backup-restore-operator/tests
+    - namespace: github.com/rancher
+      name: cis-operator
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/cis-operator
+    - namespace: github.com/rancher
       name: confd
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/confd
     - namespace: github.com/rancher
+      name: csp-adapter
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/csp-adapter
+    - namespace: github.com/rancher
+      name: eks-operator
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/eks-operator
+    - namespace: github.com/rancher
       name: fleet
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/fleet
+    - namespace: github.com/rancher/fleet/pkg
+      name: apis
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/fleet/pkg/apis
+    - namespace: github.com/rancher
+      name: gitjob
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/gitjob
+    - namespace: github.com/rancher/gitjob/pkg
+      name: apis
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/gitjob/pkg/apis
+    - namespace: github.com/rancher
+      name: gke-operator
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/gke-operator
+    - namespace: github.com/rancher
+      name: helm-project-operator
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/helm-project-operator
     - namespace: github.com/rancher
       name: image-build-rke2-cloud-provider
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/image-build-rke2-cloud-provider
@@ -54,11 +117,23 @@ pkg:
       name: kube-api-auth
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/kube-api-auth
     - namespace: github.com/rancher
+      name: local-path-provisioner
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/local-path-provisioner
+    - namespace: github.com/rancher
       name: machine
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/machine
     - namespace: github.com/rancher
+      name: prometheus-federator
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/prometheus-federator
+    - namespace: github.com/rancher
       name: rancher
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/rancher
+    - namespace: github.com/rancher/rancher/pkg
+      name: apis
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/rancher/pkg/apis
+    - namespace: github.com/rancher/rancher/pkg
+      name: client
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/rancher/pkg/client
     - namespace: github.com/rancher
       name: rke2
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/rke2
@@ -68,6 +143,15 @@ pkg:
     - namespace: github.com/rancher
       name: system-agent
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/system-agent
+    - namespace: github.com/rancher
+      name: system-upgrade-controller
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/system-upgrade-controller
+    - namespace: github.com/rancher
+      name: telemetry
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/telemetry
+    - namespace: github.com/rancher
+      name: ui-plugin-operator
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/ui-plugin-operator
     - namespace: github.com/rancher
       name: webhook
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/webhook
