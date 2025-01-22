@@ -77,6 +77,9 @@ pkg:
     - namespace: github.com/rancher
       name: backup-restore-operator
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/backup-restore-operator
+    - namespace: github.com/rancher/backup-restore-operator
+      name: tests
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/backup-restore-operator/tests
     - namespace: github.com/rancher
       name: cis-operator
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/cis-operator
@@ -92,9 +95,15 @@ pkg:
     - namespace: github.com/rancher
       name: fleet
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/fleet
+    - namespace: github.com/rancher/fleet/pkg
+      name: apis
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/fleet/pkg/apis
     - namespace: github.com/rancher
       name: gitjob
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/gitjob
+    - namespace: github.com/rancher/gitjob/pkg
+      name: apis
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/gitjob/pkg/apis
     - namespace: github.com/rancher
       name: gke-operator
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/gke-operator
@@ -119,6 +128,12 @@ pkg:
     - namespace: github.com/rancher
       name: rancher
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/rancher
+    - namespace: github.com/rancher/rancher/pkg
+      name: apis
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/rancher/pkg/apis
+    - namespace: github.com/rancher/rancher/pkg
+      name: client
+      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/rancher/pkg/client
     - namespace: github.com/rancher
       name: rke2
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/rke2
