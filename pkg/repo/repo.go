@@ -1,8 +1,10 @@
 package repo
 
+import "time"
+
 type Index struct {
-	Version  int       `json:"version"`
-	Packages []Package `json:"packages"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Packages  []Package `json:"packages"`
 }
 
 type Package struct {

@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/samber/oops"
 
@@ -17,7 +18,7 @@ func GenerateIndex(root string) error {
 	slog.Info("Generating the index of the VEX Hub")
 	errBuilder := oops.Code("file_walk_error").In("vexhub")
 	index := repo.Index{
-		Version: 1,
+		UpdatedAt: time.Now(),
 	}
 	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
 		errBuilder := oops.With("path", path)
