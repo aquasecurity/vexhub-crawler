@@ -22,8 +22,8 @@ jobs:
       with:
         go-version-file: go.mod
 
-    - name: Test
-      run: go run main.go -strict -vexhub-dir ./vexhub
-
     - name: Unit tests
       run: go test ./...
+
+    - name: Test
+      run: go run main.go -strict -vexhub-dir ./vexhub
