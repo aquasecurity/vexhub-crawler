@@ -45,7 +45,7 @@ func GenerateIndex(root string, updatedAt time.Time) error {
 		// Take the first VEX document only
 		index.Packages = append(index.Packages, repo.Package{
 			ID:       m.ID,
-			Location: filepath.Join(rel, m.Sources[0].Path),
+			Location: filepath.ToSlash(filepath.Join(rel, m.Sources[0].Path)),
 		})
 
 		return nil

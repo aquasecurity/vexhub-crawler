@@ -45,24 +45,6 @@ func Packages(ctx context.Context, opts Options) error {
 func crawlPackage(ctx context.Context, vexHubDir string, pkg config.Package) error {
 	errBuilder := oops.Code("crawl_package").With("type", pkg.PURL.Type).With("purl", pkg.PURL.String())
 
-	var crawler Crawler
-	switch pkg.PURL.Type {
-	case packageurl.TypeCargo:
-		crawler = cargo.NewCrawler()
-	case packageurl.TypeGolang:
-		crawler = golang.NewCrawler()
-	case packageurl.TypeMaven:
-		crawler = maven.NewCrawler()
-	case packageurl.TypeNPM:
-		crawler = npm.NewCrawler()
-	case packageurl.TypePyPi:
-		crawler = pypi.NewCrawler()
-	case packageurl.TypeOCI:
-		crawler = oci.NewCrawler()
-	default:
-		return oops.Errorf("unsupported package type: %s", pkg.PURL.Type)
-	}
-
 	var src *url.URL
 	var err error
 	if pkg.URL != "" {
@@ -70,6 +52,24 @@ func crawlPackage(ctx context.Context, vexHubDir string, pkg config.Package) err
 			return errBuilder.With("url", pkg.URL).Wrapf(err, "failed to normalize URL")
 		}
 	} else {
+		var crawler Crawler
+		switch pkg.PURL.Type {
+		case packageurl.TypeCargo:
+			crawler = cargo.NewCrawler()
+		case packageurl.TypeGolang:
+			crawler = golang.NewCrawler()
+		case packageurl.TypeMaven:
+			crawler = maven.NewCrawler()
+		case packageurl.TypeNPM:
+			crawler = npm.NewCrawler()
+		case packageurl.TypePyPi:
+			crawler = pypi.NewCrawler()
+		case packageurl.TypeOCI:
+			crawler = oci.NewCrawler()
+		default:
+			return oops.Errorf("unsupported package type: %s", pkg.PURL.Type)
+		}
+
 		if src, err = crawler.DetectSrc(ctx, pkg); err != nil {
 			return errBuilder.Wrapf(err, "failed to detect source repository")
 		}
