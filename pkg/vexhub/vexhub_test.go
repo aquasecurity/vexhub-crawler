@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -17,7 +18,7 @@ func TestGenerateIndex(t *testing.T) {
 		name      string
 		setup     func(root string) error
 		wantErr   require.ErrorAssertionFunc
-		wantIndex string
+		wantIndex func(updatedAt time.Time) string
 	}{
 		{
 			name: "successful index generation",
@@ -41,12 +42,14 @@ func TestGenerateIndex(t *testing.T) {
 				return os.WriteFile(manifestPath, data, 0644)
 			},
 			wantErr: require.NoError,
-			wantIndex: `{
-				"version": 1,
-				"packages": [
-					{ "id" : "package1", "location": "package1/source1" }
-				]
-			}`,
+			wantIndex: func(updatedAt time.Time) string {
+				return `{
+					"updated_at": "` + updatedAt.Format(time.RFC3339Nano) + `",
+					"packages": [
+						{ "id" : "package1", "location": "package1/source1" }
+					]
+				}`
+			},
 		},
 	}
 
@@ -56,14 +59,15 @@ func TestGenerateIndex(t *testing.T) {
 			err := tt.setup(root)
 			require.NoError(t, err)
 
-			err = vexhub.GenerateIndex(root)
+			updatedAt := time.Now()
+			err = vexhub.GenerateIndex(root, updatedAt)
 			tt.wantErr(t, err)
 
 			indexPath := filepath.Join(root, "index.json")
 			data, err := os.ReadFile(indexPath)
 			require.NoError(t, err)
 
-			require.JSONEq(t, tt.wantIndex, string(data))
+			require.JSONEq(t, tt.wantIndex(updatedAt), string(data))
 		})
 	}
 }
