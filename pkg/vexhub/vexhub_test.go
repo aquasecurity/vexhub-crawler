@@ -59,7 +59,7 @@ func TestGenerateIndex(t *testing.T) {
 			err := tt.setup(root)
 			require.NoError(t, err)
 
-			updatedAt := time.Now()
+			updatedAt := time.Date(2025, time.May, 20, 17, 16, 15, 123456789, time.UTC)
 			err = vexhub.GenerateIndex(root, updatedAt)
 			tt.wantErr(t, err)
 
