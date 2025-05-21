@@ -1,8 +1,8 @@
 package repo
 
 type Index struct {
-	Version  int       `json:"version"`
-	Packages []Package `json:"packages"`
+	UpdatedAt string    `json:"updated_at"`
+	Packages  []Package `json:"packages"`
 }
 
 type Package struct {

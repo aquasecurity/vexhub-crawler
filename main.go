@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"time"
 
 	"github.com/lmittmann/tint"
 	"github.com/samber/oops"
@@ -59,5 +60,6 @@ func run() error {
 		return oops.Wrapf(err, "failed to crawl packages")
 	}
 
-	return oops.Wrap(vexhub.GenerateIndex(*vexHubDir))
+	err = vexhub.GenerateIndex(*vexHubDir, time.Now())
+	return oops.Wrap(err)
 }

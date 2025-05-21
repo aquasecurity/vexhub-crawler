@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/samber/oops"
 
@@ -13,11 +14,12 @@ import (
 )
 
 // GenerateIndex generates the index of the VEX Hub
-func GenerateIndex(root string) error {
+func GenerateIndex(root string, updatedAt time.Time) error {
 	slog.Info("Generating the index of the VEX Hub")
+	slog.Debug("UpdatedAt will be " + updatedAt.Format(time.RFC3339Nano))
 	errBuilder := oops.Code("file_walk_error").In("vexhub")
 	index := repo.Index{
-		Version: 1,
+		UpdatedAt: updatedAt.Format(time.RFC3339Nano),
 	}
 	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
 		errBuilder := oops.With("path", path)

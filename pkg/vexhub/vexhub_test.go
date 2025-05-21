@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -42,10 +43,10 @@ func TestGenerateIndex(t *testing.T) {
 			},
 			wantErr: require.NoError,
 			wantIndex: `{
-				"version": 1,
-				"packages": [
-					{ "id" : "package1", "location": "package1/source1" }
-				]
+					"updated_at": "2025-05-20T17:16:15.123456789Z",
+					"packages": [
+						{ "id" : "package1", "location": "package1/source1" }
+					]
 			}`,
 		},
 	}
@@ -56,7 +57,8 @@ func TestGenerateIndex(t *testing.T) {
 			err := tt.setup(root)
 			require.NoError(t, err)
 
-			err = vexhub.GenerateIndex(root)
+			updatedAt := time.Date(2025, time.May, 20, 17, 16, 15, 123456789, time.UTC)
+			err = vexhub.GenerateIndex(root, updatedAt)
 			tt.wantErr(t, err)
 
 			indexPath := filepath.Join(root, "index.json")
