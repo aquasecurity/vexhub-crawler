@@ -132,9 +132,6 @@ pkg:
       name: rke2
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/rke2
     - namespace: github.com/rancher
-      name: support-bundle-kit
-      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/support-bundle-kit
-    - namespace: github.com/rancher
       name: system-agent
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/rancher/system-agent
     - namespace: github.com/rancher
