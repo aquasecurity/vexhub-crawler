@@ -41,9 +41,6 @@ pkg:
     - namespace: github.com/harvester
       name: vm-import-controller
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/vm-import-controller
-    - namespace: github.com/harvester
-      name: webhook
-      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/harvester/webhook
     - namespace: github.com/k3s-io
       name: helm-set-status
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/k3s-io/helm-set-status
