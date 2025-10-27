@@ -47,9 +47,6 @@ pkg:
     - namespace: github.com/k3s-io
       name: k3s
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/k3s-io/k3s
-    - namespace: github.com/k3s-io
-      name: kine
-      url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/k3s-io/kine
     - namespace: github.com/longhorn
       name: backing-image-manager
       url: https://github.com/rancher/vexhub/tree/main/pkg/golang/github.com/longhorn/backing-image-manager
