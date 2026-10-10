@@ -164,3 +164,7 @@ pkg:
       qualifiers:
         - key: repository_url
           value: public.ecr.aws/aquasecurity/trivy
+    - name: compose-lint
+      qualifiers:
+        - key: repository_url
+          value: index.docker.io/composelint/compose-lint
