@@ -31,6 +31,46 @@ func TestCrawler_DetectSrc(t *testing.T) {
 			want: "https://github.com/pallets/flask/",
 		},
 		{
+			name: "happy path with repository label",
+			pkg: config.Package{
+				PURL: packageurl.PackageURL{
+					Type: packageurl.TypePyPi,
+					Name: "repository-label",
+				},
+			},
+			want: "https://github.com/onnx/onnx",
+		},
+		{
+			name: "happy path with source code label",
+			pkg: config.Package{
+				PURL: packageurl.PackageURL{
+					Type: packageurl.TypePyPi,
+					Name: "source-code-label",
+				},
+			},
+			want: "https://github.com/example/source-code-label",
+		},
+		{
+			name: "happy path with github label",
+			pkg: config.Package{
+				PURL: packageurl.PackageURL{
+					Type: packageurl.TypePyPi,
+					Name: "github-label",
+				},
+			},
+			want: "https://github.com/example/github-label",
+		},
+		{
+			name: "sad path when response file contains only homepage url",
+			pkg: config.Package{
+				PURL: packageurl.PackageURL{
+					Type: packageurl.TypePyPi,
+					Name: "homepage-only",
+				},
+			},
+			wantErr: "source URL not found",
+		},
+		{
 			name: "sad path when response file doesn't contain source url",
 			pkg: config.Package{
 				PURL: packageurl.PackageURL{
