@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/url"
+	"slices"
+	"strings"
 
 	"github.com/samber/oops"
 
@@ -14,12 +16,54 @@ import (
 
 const pypiAPI = "https://pypi.org/pypi"
 
+// sourceLabels are the normalized project URL labels that point to the source repository:
+// the well-known "source" label followed by its aliases.
+// cf. https://packaging.python.org/en/latest/specifications/well-known-project-urls/#well-known-labels
+var sourceLabels = []string{"source", "repository", "sourcecode", "github"}
+
+// labelRemovedChars are the ASCII punctuation and whitespace characters removed during label normalization.
+const labelRemovedChars = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r\v\f"
+
 type Response struct {
 	Info struct {
-		ProjectURLs struct {
-			Source string
-		} `json:"project_urls"`
+		ProjectURLs map[string]string `json:"project_urls"`
 	} `json:"info"`
+}
+
+// normalizeLabel normalizes a project URL label as defined by the PyPA specification.
+// cf. https://packaging.python.org/en/latest/specifications/well-known-project-urls/#label-normalization
+func normalizeLabel(label string) string {
+	return strings.ToLower(strings.Map(func(r rune) rune {
+		if strings.ContainsRune(labelRemovedChars, r) {
+			return -1
+		}
+		return r
+	}, label))
+}
+
+// sourceURL returns the project URL labeled as the source repository, or an empty string if there is none.
+func sourceURL(projectURLs map[string]string) string {
+	// Sort labels so that the result is deterministic when several labels normalize to the same value.
+	labels := make([]string, 0, len(projectURLs))
+	for label := range projectURLs {
+		labels = append(labels, label)
+	}
+	slices.Sort(labels)
+
+	urls := make(map[string]string)
+	for _, label := range labels {
+		normalized := normalizeLabel(label)
+		if _, ok := urls[normalized]; !ok && projectURLs[label] != "" {
+			urls[normalized] = projectURLs[label]
+		}
+	}
+
+	for _, label := range sourceLabels {
+		if u, ok := urls[label]; ok {
+			return u
+		}
+	}
+	return ""
 }
 
 type Crawler struct {
@@ -69,11 +113,12 @@ func (c *Crawler) DetectSrc(_ context.Context, pkg config.Package) (*xurl.URL, e
 		return nil, errBuilder.Wrapf(err, "failed to decode response")
 	}
 
-	if r.Info.ProjectURLs.Source == "" {
+	src := sourceURL(r.Info.ProjectURLs)
+	if src == "" {
 		return nil, errBuilder.Errorf("source URL not found")
 	}
 
-	u, err := xurl.Parse(r.Info.ProjectURLs.Source)
+	u, err := xurl.Parse(src)
 	if err != nil {
 		return nil, errBuilder.Wrapf(err, "failed to normalize URL")
 	}
